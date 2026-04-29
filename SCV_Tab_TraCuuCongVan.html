@@ -168,8 +168,6 @@
                 data.sort((a, b) => parseDateCV(b.ngayBH) - parseDateCV(a.ngayBH));
                 FULL_DATA_CV = data;
                 
-                // Đã xóa lệnh hiển thị status đếm biến data.length ở đây
-                
                 filterCongVanLocal(); 
             })
             .withFailureHandler(err => {
@@ -208,7 +206,6 @@
         
         renderTableCV(result);
 
-        // BỔ SUNG: Hiển thị đúng số lượng mảng dữ liệu đã được lọc
         const st = document.getElementById('status_search_cv');
         if (st) {
             st.innerHTML = `✅ Tìm thấy: <strong style="color:#e11d48;">${result.length}</strong> văn bản`;
@@ -333,11 +330,15 @@
         return html;
     }
 
+    /* 
+       CẬP NHẬT: Ghi nhận lịch sử chat liên tục, tự động cuộn và không xóa kết quả cũ
+    */
     function sendChatToAI() {
         const query = document.getElementById('aiQueryInput').value.trim();
         const fileUrl = document.getElementById('aiCurrentFileUrl').value;
         const resBox = document.getElementById('aiResponseBox');
         const btnSend = document.getElementById('btnSendAI');
+        const modalBody = document.querySelector('.ai-modal-body');
 
         if(!query) {
             alert("Vui lòng nhập câu hỏi!"); return;
@@ -346,25 +347,61 @@
         // Khóa nút và hiện trạng thái đang tải
         btnSend.disabled = true;
         btnSend.innerHTML = "⏳ Đang phân tích...";
-        resBox.innerHTML = `<strong>👤 Bạn:</strong> ${query}<br><br><span style="color:#666;">⏳ AI đang đọc và phân tích tài liệu, xin vui lòng chờ giây lát...</span>`;
 
+        // 1. Làm sạch câu chào mặc định nếu đây là lần hỏi đầu tiên trong phiên giao dịch
+        if (resBox.innerHTML.includes('<em>Xin chào!')) {
+            resBox.innerHTML = '';
+        }
+
+        // 2. Sinh ID định danh ngẫu nhiên cho khung chờ kết quả AI ở lượt hỏi này
+        const messageId = "ai_msg_" + new Date().getTime();
+
+        // 3. Nối tiếp câu hỏi của người dùng và khung chờ phản hồi vào giao diện
+        const newChatBlock = `
+            <div style="margin-top: 15px; border-top: 1px dashed #bae6fd; padding-top: 10px;">
+                <strong>👤 Bạn:</strong> ${query}
+            </div>
+            <div id="${messageId}" style="margin-top: 8px; padding: 8px; background: #f0f9ff; border-radius: 4px;">
+                <span style="color:#666; font-style: italic;">⏳ AI đang đọc và phân tích tài liệu, xin vui lòng chờ giây lát...</span>
+            </div>
+        `;
+        resBox.innerHTML += newChatBlock;
+
+        // 4. Tự động cuộn khung nhìn xuống cuối cùng để hiển thị đoạn mới nhất
+        if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
+
+        // 5. Gửi yêu cầu lên máy chủ App Script
         google.script.run
             .withSuccessHandler(res => {
                 btnSend.disabled = false;
                 btnSend.innerHTML = "Hỏi AI";
+                
+                const targetBox = document.getElementById(messageId);
+                
                 if(res.success) {
                     // Áp dụng bộ lọc định dạng kết quả AI trước khi hiển thị
                     const formattedResponse = formatAIResponse(res.message);
-                    resBox.innerHTML = `<strong>👤 Bạn:</strong> ${query}<br><br><strong>🤖 AI Phản hồi:</strong><br>${formattedResponse}`;
-                    document.getElementById('aiQueryInput').value = ''; // Reset input
+                    if(targetBox) {
+                        targetBox.style.background = 'transparent'; // Xóa nền của trạng thái chờ
+                        targetBox.style.padding = '0';
+                        targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br>${formattedResponse}`;
+                    }
+                    document.getElementById('aiQueryInput').value = ''; // Xóa ô nhập liệu
                 } else {
-                    resBox.innerHTML = `<strong>👤 Bạn:</strong> ${query}<br><br><span style="color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</span>`;
+                    if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</span>`;
                 }
+                
+                // Tự động cuộn lại một lần nữa sau khi kết quả đã được nạp
+                if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
             })
             .withFailureHandler(err => {
                 btnSend.disabled = false;
                 btnSend.innerHTML = "Hỏi AI";
-                resBox.innerHTML = `<strong>👤 Bạn:</strong> ${query}<br><br><span style="color:red;"><strong>❌ Lỗi kết nối máy chủ:</strong> ${err}</span>`;
+                
+                const targetBox = document.getElementById(messageId);
+                if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>❌ Lỗi kết nối máy chủ:</strong> ${err}</span>`;
+                
+                if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
             })
             .SCV_chatWithDocument(fileUrl, query);
     }
