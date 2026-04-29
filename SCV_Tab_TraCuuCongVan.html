@@ -20,7 +20,9 @@
   .ai-modal-footer { padding: 15px; background: #f3f4f6; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
   .ai-response-box {
       background: #e0f2fe; padding: 10px; border-radius: 5px; margin-bottom: 10px;
-      border-left: 4px solid #0284c7; font-size: 14px; color: #1e3a8a; min-height: 50px; white-space: pre-wrap; line-height: 1.5;
+      border-left: 4px solid #0284c7; font-size: 14px; color: #1e3a8a; min-height: 50px; 
+      white-space: normal; /* CẬP NHẬT: Đổi từ pre-wrap sang normal để tránh khoảng trắng thừa do thụt lề code */
+      line-height: 1.5;
   }
 </style>
 
@@ -356,15 +358,8 @@
         // 2. Sinh ID định danh ngẫu nhiên cho khung chờ kết quả AI ở lượt hỏi này
         const messageId = "ai_msg_" + new Date().getTime();
 
-        // 3. Nối tiếp câu hỏi của người dùng và khung chờ phản hồi vào giao diện
-        const newChatBlock = `
-            <div style="margin-top: 15px; border-top: 1px dashed #bae6fd; padding-top: 10px;">
-                <strong>👤 Bạn:</strong> ${query}
-            </div>
-            <div id="${messageId}" style="margin-top: 8px; padding: 8px; background: #f0f9ff; border-radius: 4px;">
-                <span style="color:#666; font-style: italic;">⏳ AI đang đọc và phân tích tài liệu, xin vui lòng chờ giây lát...</span>
-            </div>
-        `;
+        // CẬP NHẬT: Xóa toàn bộ khoảng trắng và dấu xuống dòng (thụt lề) dư thừa trong chuỗi HTML để tránh bị đẩy khung
+        const newChatBlock = `<div style="margin-top: 10px; border-top: 1px dashed #bae6fd; padding-top: 10px;"><strong>👤 Bạn:</strong> ${query}</div><div id="${messageId}" style="margin-top: 8px; padding: 8px; background: #f0f9ff; border-radius: 4px;"><span style="color:#666; font-style: italic;">⏳ AI đang đọc và phân tích tài liệu, xin vui lòng chờ giây lát...</span></div>`;
         resBox.innerHTML += newChatBlock;
 
         // 4. Tự động cuộn khung nhìn xuống cuối cùng để hiển thị đoạn mới nhất
