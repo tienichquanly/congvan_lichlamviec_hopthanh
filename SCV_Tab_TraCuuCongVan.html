@@ -21,7 +21,7 @@
   .ai-response-box {
       background: #e0f2fe; padding: 10px; border-radius: 5px; margin-bottom: 10px;
       border-left: 4px solid #0284c7; font-size: 14px; color: #1e3a8a; min-height: 50px; 
-      white-space: normal; /* CẬP NHẬT: Đổi từ pre-wrap sang normal để tránh khoảng trắng thừa do thụt lề code */
+      white-space: normal; /* Đã giữ lại bản vá lỗi khoảng trắng thừa */
       line-height: 1.5;
   }
 </style>
@@ -96,7 +96,7 @@
             <input type="hidden" id="aiCurrentFileUrl">
         </div>
         <div class="ai-modal-footer">
-            <textarea id="aiQueryInput" placeholder="Ví dụ: Tóm tắt nội dung chính của văn bản này?" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; resize:none; height:40px; font-family:inherit;"></textarea>
+            <textarea id="aiQueryInput" placeholder="Ví dụ: Tóm tắt nội dung chính của văn bản này?" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; resize:none; height:40px; font-family:inherit;" onkeydown="checkEnterChat(event)"></textarea>
             <button onclick="sendChatToAI()" id="btnSendAI" style="background:#1e3a8a; color:white; border:none; padding:0 20px; border-radius:4px; font-weight:bold; cursor:pointer;">Hỏi AI</button>
         </div>
     </div>
@@ -301,6 +301,16 @@
     // ==========================================
     // CÁC HÀM XỬ LÝ GIAO TIẾP VỚI TRỢ LÝ AI
     // ==========================================
+    
+    // CẬP NHẬT: Xử lý sự kiện nhấn Enter trong ô nhập liệu AI
+    function checkEnterChat(e) {
+        // Nếu nhấn Enter và không kèm phím Shift
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault(); // Ngăn hành vi tự động tạo dòng mới của textarea
+            sendChatToAI();
+        }
+    }
+
     function openChatModal(fileUrl) {
         document.getElementById('aiChatModal').style.display = 'flex';
         document.getElementById('aiCurrentFileUrl').value = fileUrl;
@@ -332,9 +342,6 @@
         return html;
     }
 
-    /* 
-       CẬP NHẬT: Ghi nhận lịch sử chat liên tục, tự động cuộn và không xóa kết quả cũ
-    */
     function sendChatToAI() {
         const query = document.getElementById('aiQueryInput').value.trim();
         const fileUrl = document.getElementById('aiCurrentFileUrl').value;
@@ -358,7 +365,7 @@
         // 2. Sinh ID định danh ngẫu nhiên cho khung chờ kết quả AI ở lượt hỏi này
         const messageId = "ai_msg_" + new Date().getTime();
 
-        // CẬP NHẬT: Xóa toàn bộ khoảng trắng và dấu xuống dòng (thụt lề) dư thừa trong chuỗi HTML để tránh bị đẩy khung
+        // CẬP NHẬT: Viết liền mạch mã HTML để tránh bị đẩy khung trắng thụt lề
         const newChatBlock = `<div style="margin-top: 10px; border-top: 1px dashed #bae6fd; padding-top: 10px;"><strong>👤 Bạn:</strong> ${query}</div><div id="${messageId}" style="margin-top: 8px; padding: 8px; background: #f0f9ff; border-radius: 4px;"><span style="color:#666; font-style: italic;">⏳ AI đang đọc và phân tích tài liệu, xin vui lòng chờ giây lát...</span></div>`;
         resBox.innerHTML += newChatBlock;
 
