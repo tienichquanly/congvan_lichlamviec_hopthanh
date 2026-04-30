@@ -21,7 +21,7 @@
   .ai-response-box {
       background: #e0f2fe; padding: 10px; border-radius: 5px; margin-bottom: 10px;
       border-left: 4px solid #0284c7; font-size: 14px; color: #1e3a8a; min-height: 50px; 
-      white-space: normal; /* Đã giữ lại bản vá lỗi khoảng trắng thừa */
+      white-space: normal;
       line-height: 1.5;
   }
 </style>
@@ -105,6 +105,9 @@
 <script>
     let FULL_DATA_CV = [];
     let IS_AUTH_CV = false; 
+    
+    // BỔ SUNG: Khởi tạo bộ nhớ đệm toàn cục cho Trợ lý AI
+    window.SCV_AI_CACHE = window.SCV_AI_CACHE || {};
 
     function initSearchCV() {
         if (typeof google === 'undefined' || !google.script) return;
@@ -302,11 +305,9 @@
     // CÁC HÀM XỬ LÝ GIAO TIẾP VỚI TRỢ LÝ AI
     // ==========================================
     
-    // CẬP NHẬT: Xử lý sự kiện nhấn Enter trong ô nhập liệu AI
     function checkEnterChat(e) {
-        // Nếu nhấn Enter và không kèm phím Shift
         if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault(); // Ngăn hành vi tự động tạo dòng mới của textarea
+            e.preventDefault(); 
             sendChatToAI();
         }
     }
@@ -322,26 +323,49 @@
         document.getElementById('aiChatModal').style.display = 'none';
     }
 
-    // BỘ LỌC ĐỊNH DẠNG: Làm đẹp kết quả trả về từ AI (Loại bỏ ký tự thừa, in đậm, gạch đầu dòng)
     function formatAIResponse(text) {
         if (!text) return "";
         let html = text;
-        
-        // 1. Chuyển đổi **nội dung** thành thẻ in đậm có màu nhấn
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1e3a8a;">$1</strong>');
-        
-        // 2. Chuyển đổi * hoặc - ở đầu dòng thành dấu chấm Bullet có lề
         html = html.replace(/(^|\n)\s*[\*\-]\s+(.*)/g, '$1<div style="margin-left: 15px; margin-bottom: 5px;">&bull; $2</div>');
-        
-        // 3. Xử lý xuống dòng chuẩn
         html = html.replace(/\n/g, '<br>');
-        
-        // 4. Dọn dẹp khoảng trắng thừa do thẻ div tạo ra
         html = html.replace(/<\/div><br>/g, '</div>');
-        
         return html;
     }
 
+    // BỔ SUNG: Hiệu ứng gõ chữ mượt mà
+    function renderTypewriterEffect(elementId, htmlContent, scrollContainer) {
+        const targetBox = document.getElementById(elementId);
+        if (!targetBox) return;
+        
+        targetBox.style.background = 'transparent'; 
+        targetBox.style.padding = '0';
+        targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br><span id="content_${elementId}"></span>`;
+        
+        const contentSpan = document.getElementById(`content_${elementId}`);
+        
+        let i = 0;
+        let isTag = false;
+        let textObj = "";
+        
+        function typing() {
+            if (i < htmlContent.length) {
+                textObj = htmlContent.charAt(i);
+                if (textObj === '<') isTag = true;
+                if (textObj === '>') isTag = false;
+                
+                contentSpan.innerHTML += textObj;
+                if (scrollContainer) scrollContainer.scrollTop = scrollContainer.scrollHeight;
+                i++;
+                
+                let delay = isTag ? 0 : 5; 
+                setTimeout(typing, delay);
+            }
+        }
+        typing();
+    }
+
+    // CẬP NHẬT: Tích hợp Bộ nhớ đệm và Hiệu ứng Typewriter
     function sendChatToAI() {
         const query = document.getElementById('aiQueryInput').value.trim();
         const fileUrl = document.getElementById('aiCurrentFileUrl').value;
@@ -353,26 +377,30 @@
             alert("Vui lòng nhập câu hỏi!"); return;
         }
 
-        // Khóa nút và hiện trạng thái đang tải
         btnSend.disabled = true;
         btnSend.innerHTML = "⏳ Đang phân tích...";
 
-        // 1. Làm sạch câu chào mặc định nếu đây là lần hỏi đầu tiên trong phiên giao dịch
         if (resBox.innerHTML.includes('<em>Xin chào!')) {
             resBox.innerHTML = '';
         }
 
-        // 2. Sinh ID định danh ngẫu nhiên cho khung chờ kết quả AI ở lượt hỏi này
         const messageId = "ai_msg_" + new Date().getTime();
-
-        // CẬP NHẬT: Viết liền mạch mã HTML để tránh bị đẩy khung trắng thụt lề
         const newChatBlock = `<div style="margin-top: 10px; border-top: 1px dashed #bae6fd; padding-top: 10px;"><strong>👤 Bạn:</strong> ${query}</div><div id="${messageId}" style="margin-top: 8px; padding: 8px; background: #f0f9ff; border-radius: 4px;"><span style="color:#666; font-style: italic;">⏳ AI đang đọc và phân tích tài liệu, xin vui lòng chờ giây lát...</span></div>`;
         resBox.innerHTML += newChatBlock;
 
-        // 4. Tự động cuộn khung nhìn xuống cuối cùng để hiển thị đoạn mới nhất
         if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
 
-        // 5. Gửi yêu cầu lên máy chủ App Script
+        // XỬ LÝ BỘ NHỚ ĐỆM (CACHE)
+        const cacheKey = fileUrl + "_" + query.toLowerCase();
+        if (window.SCV_AI_CACHE[cacheKey]) {
+            btnSend.disabled = false;
+            btnSend.innerHTML = "Hỏi AI";
+            document.getElementById('aiQueryInput').value = '';
+            // Trả kết quả tức thì từ RAM
+            renderTypewriterEffect(messageId, window.SCV_AI_CACHE[cacheKey], modalBody);
+            return;
+        }
+
         google.script.run
             .withSuccessHandler(res => {
                 btnSend.disabled = false;
@@ -381,19 +409,20 @@
                 const targetBox = document.getElementById(messageId);
                 
                 if(res.success) {
-                    // Áp dụng bộ lọc định dạng kết quả AI trước khi hiển thị
                     const formattedResponse = formatAIResponse(res.message);
+                    
+                    // Lưu kết quả vào Cache để dùng lại
+                    window.SCV_AI_CACHE[cacheKey] = formattedResponse;
+                    
                     if(targetBox) {
-                        targetBox.style.background = 'transparent'; // Xóa nền của trạng thái chờ
-                        targetBox.style.padding = '0';
-                        targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br>${formattedResponse}`;
+                        // Kích hoạt hiệu ứng thay vì hiển thị toàn bộ văn bản cùng lúc
+                        renderTypewriterEffect(messageId, formattedResponse, modalBody);
                     }
-                    document.getElementById('aiQueryInput').value = ''; // Xóa ô nhập liệu
+                    document.getElementById('aiQueryInput').value = ''; 
                 } else {
                     if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</span>`;
                 }
                 
-                // Tự động cuộn lại một lần nữa sau khi kết quả đã được nạp
                 if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
             })
             .withFailureHandler(err => {
