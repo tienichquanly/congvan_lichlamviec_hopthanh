@@ -225,7 +225,7 @@
     }
   }
 
-  /* --- CẬP NHẬT: XỬ LÝ ĐĂNG NHẬP (Bao gồm kiểm tra phiên Khách) --- */
+  /* --- CẬP NHẬT CHUẨN HÓA LOGIC TẢI DỮ LIỆU ĐẦU VÀO --- */
   window.onload = function() {
     if (!checkTrialPeriod()) return;
     const storedId = sessionStorage.getItem("SCV_ACTIVE_ID");
@@ -234,7 +234,6 @@
       document.getElementById('login-overlay').style.display = 'none';
       document.getElementById('loading-overlay').style.display = 'flex';
       
-      // Xử lý nạp dữ liệu riêng biệt cho tài khoản Khách
       if (storedId === "Khách") {
           handleGuestLogin(true);
       } else {
@@ -256,7 +255,7 @@
     checkPermissionAndLoad();
   }
   
-  /* --- CẬP NHẬT: HÀM ĐĂNG NHẬP KHÁCH THEO CHỈ ĐẠO --- */
+  /* --- CẬP NHẬT: GỘP LUỒNG KHÁCH TRỰC TIẾP VÀO SCV_getInitialData GIÚP HỆ THỐNG KHÔNG BỊ TREO --- */
   function handleGuestLogin(isAutoLogin = false) {
     if (!checkTrialPeriod()) return;
     
@@ -266,8 +265,7 @@
     }
     
     google.script.run.withSuccessHandler(res => {
-      // Nếu C5 = "all"
-      if (res && res.toString().toLowerCase() === "all") {
+      if (res && res.canView) {
         sessionStorage.setItem("SCV_ACTIVE_ID", "Khách");
         window.SCV_GLOBAL_ID = "Khách";
         
@@ -277,14 +275,12 @@
         
         document.getElementById('mainApp').style.display = 'block';
         
-        // Ẩn quyền nhập đối với Khách
         document.getElementById('btnTabNhap').style.display = 'none';
         document.getElementById('btnTabCV').style.display = 'none';
         showTab('tabSearch', document.getElementById('btnTabSearch'));
         
         loadSystemModules();
       } else {
-        // Nếu C5 = "" hoặc không phải "all"
         alert("Cần phải được cấp quyền truy cập");
         sessionStorage.removeItem("SCV_ACTIVE_ID");
         document.getElementById('loading-overlay').style.display = 'none';
@@ -294,7 +290,7 @@
         alert("Lỗi kiểm tra quyền hệ thống: " + err.message);
         document.getElementById('loading-overlay').style.display = 'none';
         document.getElementById('login-overlay').style.display = 'flex';
-    }).SCV_CheckGuestAccess();
+    }).SCV_getInitialData("Khách"); // Truyền trực tiếp ID "Khách" để server trả về quyền thích hợp
   }
 
   function decodeJwtResponse(token) {
@@ -312,6 +308,7 @@
     location.reload(); 
   }
 
+  /* --- CẬP NHẬT: TRUYỀN THAM SỐ ID VÀO HÀM SCV_getInitialData ĐỂ KHÔNG BỊ LỖI QUYỀN --- */
   function checkPermissionAndLoad() {
     google.script.run.withSuccessHandler(res => {
       document.getElementById('loading-overlay').style.display = 'none';
@@ -333,7 +330,7 @@
           document.getElementById('btnTabCV').style.display = 'inline-block';
       }
       loadSystemModules();
-    }).SCV_getInitialData();
+    }).SCV_getInitialData(window.SCV_GLOBAL_ID);
   }
 
   async function loadSystemModules() {
