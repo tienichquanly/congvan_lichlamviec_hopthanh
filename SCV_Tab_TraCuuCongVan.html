@@ -16,14 +16,37 @@
       background: #1e3a8a; color: white; padding: 15px; font-weight: bold;
       display: flex; justify-content: space-between; align-items: center;
   }
-  .ai-modal-body { padding: 15px; flex: 1; max-height: 60vh; overflow-y: auto; }
+  
+  /* Tối ưu hóa lăn bi chuột và thanh cuộn cho khung chat */
+  .ai-modal-body { 
+      padding: 15px; 
+      flex: 1; 
+      max-height: 60vh; 
+      overflow-y: auto; 
+      overscroll-behavior: contain; /* Ngăn cuộn trang nền khi lăn chuột ở đây */
+      scroll-behavior: smooth; 
+  }
+  .ai-modal-body::-webkit-scrollbar { width: 8px; }
+  .ai-modal-body::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+  .ai-modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .ai-modal-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
   .ai-modal-footer { padding: 15px; background: #f3f4f6; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
+  
   .ai-response-box {
       background: #e0f2fe; padding: 10px; border-radius: 5px; margin-bottom: 10px;
       border-left: 4px solid #0284c7; font-size: 14px; color: #1e3a8a; min-height: 50px; 
       white-space: normal;
-      line-height: 1.5;
+      line-height: 1.6;
   }
+  
+  /* Đảm bảo ô nhập liệu cũng có thanh cuộn nếu văn bản quá dài */
+  #aiQueryInput {
+      overflow-y: auto;
+  }
+  #aiQueryInput::-webkit-scrollbar { width: 6px; }
+  #aiQueryInput::-webkit-scrollbar-track { background: transparent; }
+  #aiQueryInput::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 </style>
 
 <div style="margin-bottom: 10px; overflow: hidden; display: flex; justify-content: space-between; align-items: center;">
