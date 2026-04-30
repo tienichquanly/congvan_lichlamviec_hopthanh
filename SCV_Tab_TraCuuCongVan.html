@@ -323,17 +323,34 @@
         document.getElementById('aiChatModal').style.display = 'none';
     }
 
+    // CẬP NHẬT: Bộ lọc nội dung AI gọn gàng, tự động xuống dòng và xử lý danh sách
     function formatAIResponse(text) {
         if (!text) return "";
         let html = text;
+        
+        // 1. Chuyển đổi **nội dung** thành thẻ in đậm
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1e3a8a;">$1</strong>');
+        
+        // 2. Xử lý danh sách Bullet (* hoặc - ở đầu dòng)
         html = html.replace(/(^|\n)\s*[\*\-]\s+(.*)/g, '$1<div style="margin-left: 15px; margin-bottom: 5px;">&bull; $2</div>');
+        
+        // 3. Xử lý danh sách đánh số thứ tự (1., 2., 3. ở đầu dòng)
+        html = html.replace(/(^|\n)\s*(\d+\.)\s+(.*)/g, '$1<div style="margin-left: 15px; margin-bottom: 5px;"><strong style="color: #b91c1c;">$2</strong> $3</div>');
+        
+        // 4. Lọc bỏ các khoảng trắng / dòng trống thừa (gộp nhiều \n thành 1)
+        html = html.replace(/\n{2,}/g, '\n');
+        
+        // 5. Chuyển đổi \n thành <br> để xuống dòng chuẩn xác
         html = html.replace(/\n/g, '<br>');
+        
+        // 6. Dọn dẹp các thẻ <br> thừa phát sinh xung quanh thẻ <div>
         html = html.replace(/<\/div><br>/g, '</div>');
+        html = html.replace(/<br><div/g, '<div');
+        
         return html;
     }
 
-    // BỔ SUNG: Hiệu ứng gõ chữ mượt mà
+    // Hiệu ứng gõ chữ mượt mà
     function renderTypewriterEffect(elementId, htmlContent, scrollContainer) {
         const targetBox = document.getElementById(elementId);
         if (!targetBox) return;
@@ -365,7 +382,7 @@
         typing();
     }
 
-    // CẬP NHẬT: Tích hợp Bộ nhớ đệm và Hiệu ứng Typewriter
+    // Tích hợp Bộ nhớ đệm và Hiệu ứng Typewriter
     function sendChatToAI() {
         const query = document.getElementById('aiQueryInput').value.trim();
         const fileUrl = document.getElementById('aiCurrentFileUrl').value;
