@@ -194,7 +194,8 @@
     </div>
 </div>
 
-<div id="global_msg" style="display:none; position:fixed; bottom:20px; right:20px; background:#333; color:white; padding:10px 20px; border-radius:4px; z-index:9999;"></div>
+<!-- Nâng z-index lên 9999999 để hiển thị trên cả hộp thoại đăng nhập và thiết kế lại CSS -->
+<div id="global_msg" style="display:none; position:fixed; bottom:20px; right:20px; background:#b91c1c; color:white; padding:15px 25px; border-radius:6px; z-index:9999999; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></div>
 
 <script>
   let GLOBAL_USER = "";
@@ -281,13 +282,15 @@
         
         loadSystemModules();
       } else {
-        alert("Cần phải được cấp quyền truy cập");
+        // Sử dụng thông báo UI (toast) thay cho alert
+        toast("⚠️ Cần phải được cấp quyền truy cập để xem dữ liệu");
         sessionStorage.removeItem("SCV_ACTIVE_ID");
         document.getElementById('loading-overlay').style.display = 'none';
         document.getElementById('login-overlay').style.display = 'flex';
       }
     }).withFailureHandler(err => {
-        alert("Lỗi kiểm tra quyền hệ thống: " + err.message);
+        // Sử dụng thông báo UI (toast) thay cho alert
+        toast("❌ Lỗi kiểm tra quyền hệ thống: " + err.message);
         document.getElementById('loading-overlay').style.display = 'none';
         document.getElementById('login-overlay').style.display = 'flex';
     }).SCV_getInitialData("Khách"); // Truyền trực tiếp ID "Khách" để server trả về quyền thích hợp
@@ -357,7 +360,8 @@
             try { if(typeof initSearchCV === 'function') initSearchCV(); } catch(e) {}
         }, 800);
       } catch (e) {
-        alert("LỖI KẾT NỐI TỆP: " + e.message);
+        // Sử dụng thông báo UI (toast) thay cho alert
+        toast("❌ LỖI KẾT NỐI TỆP: " + e.message);
       }
   }
 
