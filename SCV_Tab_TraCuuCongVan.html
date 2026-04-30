@@ -323,7 +323,7 @@
         document.getElementById('aiChatModal').style.display = 'none';
     }
 
-    // CẬP NHẬT: Bộ lọc nội dung AI tối giản, xóa bỏ hoàn toàn thẻ <div> gây lỗi khoảng trắng
+    // Bộ lọc nội dung AI tối giản
     function formatAIResponse(text) {
         if (!text) return "";
         let html = text;
@@ -331,7 +331,7 @@
         // 1. Chuyển đổi **nội dung** thành thẻ in đậm đơn giản
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         
-        // 2. Xóa bỏ các dòng trống thừa mứa (giới hạn tối đa 2 lần xuống dòng liên tiếp)
+        // 2. Xóa bỏ các dòng trống thừa mứa
         html = html.replace(/\n{3,}/g, '\n\n');
         
         // 3. Chuyển đổi \n thành <br> để xuống dòng
@@ -340,7 +340,7 @@
         return html;
     }
 
-    // Hiệu ứng gõ chữ mượt mà
+    // HIỆU ỨNG GÕ CHỮ (ĐÃ SỬA LỖI ĐỂ TRÌNH DUYỆT HIỂU THẺ <br>)
     function renderTypewriterEffect(elementId, htmlContent, scrollContainer) {
         const targetBox = document.getElementById(elementId);
         if (!targetBox) return;
@@ -352,20 +352,32 @@
         const contentSpan = document.getElementById(`content_${elementId}`);
         
         let i = 0;
-        let isTag = false;
-        let textObj = "";
         
         function typing() {
             if (i < htmlContent.length) {
-                textObj = htmlContent.charAt(i);
-                if (textObj === '<') isTag = true;
-                if (textObj === '>') isTag = false;
+                let textObj = "";
+                let delay = 5;
+
+                // Nếu quét thấy ký tự '<', tiến hành bắt toàn bộ nội dung cho đến dấu '>'
+                // Điều này giúp trình duyệt nhận trọn vẹn thẻ <br> thay vì từng ký tự rời rạc
+                if (htmlContent.charAt(i) === '<') {
+                    let tagEnd = htmlContent.indexOf('>', i);
+                    if (tagEnd !== -1) {
+                        textObj = htmlContent.substring(i, tagEnd + 1);
+                        i = tagEnd + 1; // Nhảy cóc qua thẻ vừa lấy
+                        delay = 0; // Không tạo độ trễ khi in thẻ HTML
+                    } else {
+                        textObj = htmlContent.charAt(i);
+                        i++;
+                    }
+                } else {
+                    textObj = htmlContent.charAt(i);
+                    i++;
+                }
                 
                 contentSpan.innerHTML += textObj;
                 if (scrollContainer) scrollContainer.scrollTop = scrollContainer.scrollHeight;
-                i++;
                 
-                let delay = isTag ? 0 : 5; 
                 setTimeout(typing, delay);
             }
         }
@@ -422,7 +434,6 @@
                     window.SCV_AI_CACHE[cacheKey] = formattedResponse;
                     
                     if(targetBox) {
-                        // Kích hoạt hiệu ứng thay vì hiển thị toàn bộ văn bản cùng lúc
                         renderTypewriterEffect(messageId, formattedResponse, modalBody);
                     }
                     document.getElementById('aiQueryInput').value = ''; 
