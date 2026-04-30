@@ -323,70 +323,27 @@
         document.getElementById('aiChatModal').style.display = 'none';
     }
 
-    // Bộ lọc nội dung AI tối giản
+    // Bộ lọc nội dung AI tối giản (Chỉ in đậm và xuống dòng)
     function formatAIResponse(text) {
         if (!text) return "";
         let html = text;
         
-        // 1. Chuyển đổi **nội dung** thành thẻ in đậm đơn giản
+        // 1. Chuyển đổi **nội dung** thành thẻ in đậm
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         
-        // 2. Xóa bỏ các dòng trống thừa mứa
+        // 2. Xóa bỏ khoảng trắng thừa mứa
         html = html.replace(/\n{3,}/g, '\n\n');
         
-        // 3. Chuyển đổi \n thành <br> để xuống dòng
+        // 3. Đổi dấu xuống dòng thành thẻ <br> chuẩn của HTML
         html = html.replace(/\n/g, '<br>');
         
         return html;
     }
 
-    // HIỆU ỨNG GÕ CHỮ (ĐÃ SỬA LỖI ĐỂ TRÌNH DUYỆT HIỂU THẺ <br>)
-    function renderTypewriterEffect(elementId, htmlContent, scrollContainer) {
-        const targetBox = document.getElementById(elementId);
-        if (!targetBox) return;
-        
-        targetBox.style.background = 'transparent'; 
-        targetBox.style.padding = '0';
-        targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br><span id="content_${elementId}"></span>`;
-        
-        const contentSpan = document.getElementById(`content_${elementId}`);
-        
-        let i = 0;
-        
-        function typing() {
-            if (i < htmlContent.length) {
-                let textObj = "";
-                let delay = 5;
-
-                // Nếu quét thấy ký tự '<', tiến hành bắt toàn bộ nội dung cho đến dấu '>'
-                // Điều này giúp trình duyệt nhận trọn vẹn thẻ <br> thay vì từng ký tự rời rạc
-                if (htmlContent.charAt(i) === '<') {
-                    let tagEnd = htmlContent.indexOf('>', i);
-                    if (tagEnd !== -1) {
-                        textObj = htmlContent.substring(i, tagEnd + 1);
-                        i = tagEnd + 1; // Nhảy cóc qua thẻ vừa lấy
-                        delay = 0; // Không tạo độ trễ khi in thẻ HTML
-                    } else {
-                        textObj = htmlContent.charAt(i);
-                        i++;
-                    }
-                } else {
-                    textObj = htmlContent.charAt(i);
-                    i++;
-                }
-                
-                contentSpan.innerHTML += textObj;
-                if (scrollContainer) scrollContainer.scrollTop = scrollContainer.scrollHeight;
-                
-                setTimeout(typing, delay);
-            }
-        }
-        typing();
-    }
-
-    // Tích hợp Bộ nhớ đệm và Hiệu ứng Typewriter
+    // Tích hợp Bộ nhớ đệm và Hiển thị Tức thì (Đã BỎ Typewriter)
     function sendChatToAI() {
-        const query = document.getElementById('aiQueryInput').value.trim();
+        const queryInput = document.getElementById('aiQueryInput');
+        const query = queryInput.value.trim();
         const fileUrl = document.getElementById('aiCurrentFileUrl').value;
         const resBox = document.getElementById('aiResponseBox');
         const btnSend = document.getElementById('btnSendAI');
@@ -395,6 +352,9 @@
         if(!query) {
             alert("Vui lòng nhập câu hỏi!"); return;
         }
+
+        // LÀM SẠCH KHUNG NHẬP LIỆU NGAY LẬP TỨC ĐỂ TRÁNH NGƯỜI DÙNG BẤM GỬI NHIỀU LẦN
+        queryInput.value = '';
 
         btnSend.disabled = true;
         btnSend.innerHTML = "⏳ Đang phân tích...";
@@ -414,9 +374,15 @@
         if (window.SCV_AI_CACHE[cacheKey]) {
             btnSend.disabled = false;
             btnSend.innerHTML = "Hỏi AI";
-            document.getElementById('aiQueryInput').value = '';
-            // Trả kết quả tức thì từ RAM
-            renderTypewriterEffect(messageId, window.SCV_AI_CACHE[cacheKey], modalBody);
+            
+            // In thẳng kết quả ra màn hình ngay lập tức (Không chờ gõ phím)
+            const targetBox = document.getElementById(messageId);
+            if(targetBox) {
+                targetBox.style.background = 'transparent';
+                targetBox.style.padding = '0';
+                targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br>${window.SCV_AI_CACHE[cacheKey]}`;
+            }
+            if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
             return;
         }
 
@@ -434,9 +400,11 @@
                     window.SCV_AI_CACHE[cacheKey] = formattedResponse;
                     
                     if(targetBox) {
-                        renderTypewriterEffect(messageId, formattedResponse, modalBody);
+                        // In thẳng kết quả ra màn hình ngay lập tức
+                        targetBox.style.background = 'transparent';
+                        targetBox.style.padding = '0';
+                        targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br>${formattedResponse}`;
                     }
-                    document.getElementById('aiQueryInput').value = ''; 
                 } else {
                     if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</span>`;
                 }
