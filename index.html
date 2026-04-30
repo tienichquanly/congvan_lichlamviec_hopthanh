@@ -29,6 +29,10 @@
     /* MÀN HÌNH ĐĂNG NHẬP */
     #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0fdf4; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: "Times New Roman", serif; }
     .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid #1e3a8a; }
+    
+    /* Nút đăng nhập khách */
+    .btn-guest { background: #64748b; color: white; border: none; padding: 10px 20px; font-size: 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; max-width: 250px; transition: background 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .btn-guest:hover { background: #475569; }
 
     /* --- 2. CẤU HÌNH GIAO DIỆN CHÍNH --- */
     :root { --primary: #1e3a8a; --red: #b91c1c; --bg: #f3f4f6; }
@@ -116,8 +120,9 @@
     
     <div id="g_id_onload"  data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
     
-    <div style="display: flex; justify-content: center; width: 100%;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px;">
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+        <button class="btn-guest" onclick="handleGuestLogin()">👤 Đăng nhập Khách</button>
     </div>
     
     <div style="margin-top: 30px; font-size: 15px; color: #888; font-weight: bold; text-align: center; width: 100%;">Phát triển bởi: HOÀNG NGỌC LÂM</div>
@@ -220,6 +225,7 @@
     }
   }
 
+  /* --- CẬP NHẬT: XỬ LÝ ĐĂNG NHẬP (Bao gồm kiểm tra phiên Khách) --- */
   window.onload = function() {
     if (!checkTrialPeriod()) return;
     const storedId = sessionStorage.getItem("SCV_ACTIVE_ID");
@@ -227,7 +233,13 @@
       window.SCV_GLOBAL_ID = storedId; 
       document.getElementById('login-overlay').style.display = 'none';
       document.getElementById('loading-overlay').style.display = 'flex';
-      checkPermissionAndLoad();
+      
+      // Xử lý nạp dữ liệu riêng biệt cho tài khoản Khách
+      if (storedId === "Khách") {
+          handleGuestLogin(true);
+      } else {
+          checkPermissionAndLoad();
+      }
     }
   };
 
@@ -242,6 +254,47 @@
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('loading-overlay').style.display = 'flex';
     checkPermissionAndLoad();
+  }
+  
+  /* --- CẬP NHẬT: HÀM ĐĂNG NHẬP KHÁCH THEO CHỈ ĐẠO --- */
+  function handleGuestLogin(isAutoLogin = false) {
+    if (!checkTrialPeriod()) return;
+    
+    if (!isAutoLogin) {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('loading-overlay').style.display = 'flex';
+    }
+    
+    google.script.run.withSuccessHandler(res => {
+      // Nếu C5 = "all"
+      if (res && res.toString().toLowerCase() === "all") {
+        sessionStorage.setItem("SCV_ACTIVE_ID", "Khách");
+        window.SCV_GLOBAL_ID = "Khách";
+        
+        document.getElementById('loading-overlay').style.display = 'none';
+        GLOBAL_USER = "Khách";
+        GLOBAL_PERM = false; 
+        
+        document.getElementById('mainApp').style.display = 'block';
+        
+        // Ẩn quyền nhập đối với Khách
+        document.getElementById('btnTabNhap').style.display = 'none';
+        document.getElementById('btnTabCV').style.display = 'none';
+        showTab('tabSearch', document.getElementById('btnTabSearch'));
+        
+        loadSystemModules();
+      } else {
+        // Nếu C5 = "" hoặc không phải "all"
+        alert("Cần phải được cấp quyền truy cập");
+        sessionStorage.removeItem("SCV_ACTIVE_ID");
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('login-overlay').style.display = 'flex';
+      }
+    }).withFailureHandler(err => {
+        alert("Lỗi kiểm tra quyền hệ thống: " + err.message);
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('login-overlay').style.display = 'flex';
+    }).SCV_CheckGuestAccess();
   }
 
   function decodeJwtResponse(token) {
