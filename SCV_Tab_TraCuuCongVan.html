@@ -47,6 +47,14 @@
   #aiQueryInput::-webkit-scrollbar { width: 6px; }
   #aiQueryInput::-webkit-scrollbar-track { background: transparent; }
   #aiQueryInput::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+  /* Nút Copy kết quả AI */
+  .btn-copy {
+      background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;
+      padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;
+      margin-top: 10px; display: inline-block; font-weight: bold; transition: all 0.3s;
+  }
+  .btn-copy:hover { background-color: #e2e8f0; color: #1e3a8a; border-color: #94a3b8; }
 </style>
 
 <div style="margin-bottom: 10px; overflow: hidden; display: flex; justify-content: space-between; align-items: center;">
@@ -129,7 +137,7 @@
     let FULL_DATA_CV = [];
     let IS_AUTH_CV = false; 
     
-    // BỔ SUNG: Khởi tạo bộ nhớ đệm toàn cục cho Trợ lý AI
+    // Khởi tạo bộ nhớ đệm toàn cục cho Trợ lý AI
     window.SCV_AI_CACHE = window.SCV_AI_CACHE || {};
 
     function initSearchCV() {
@@ -363,6 +371,31 @@
         return html;
     }
 
+    // Hàm copy nội dung phản hồi của AI
+    function copyToClipboard(button, elementId) {
+        const contentElement = document.getElementById(elementId);
+        if (!contentElement) return;
+
+        // Trích xuất văn bản thuần tuý (bỏ các thẻ HTML) để khi dán ra Word/Zalo được sạch đẹp
+        let textToCopy = contentElement.innerText || contentElement.textContent;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalText = button.innerHTML;
+            button.innerHTML = "✅ Đã copy!";
+            button.style.backgroundColor = "#dcfce3";
+            button.style.color = "#166534";
+            button.style.borderColor = "#86efac";
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.backgroundColor = "#f1f5f9";
+                button.style.color = "#475569";
+                button.style.borderColor = "#cbd5e1";
+            }, 2000);
+        }).catch(err => {
+            console.error("Lỗi sao chép: ", err);
+        });
+    }
+
     // Tích hợp Bộ nhớ đệm và Hiển thị Tức thì (Đã BỎ Typewriter)
     function sendChatToAI() {
         const queryInput = document.getElementById('aiQueryInput');
@@ -398,12 +431,13 @@
             btnSend.disabled = false;
             btnSend.innerHTML = "Hỏi AI";
             
-            // In thẳng kết quả ra màn hình ngay lập tức (Không chờ gõ phím)
+            // In thẳng kết quả ra màn hình ngay lập tức (Không chờ gõ phím) và gắn nút Copy
             const targetBox = document.getElementById(messageId);
             if(targetBox) {
                 targetBox.style.background = 'transparent';
                 targetBox.style.padding = '0';
-                targetBox.innerHTML = `<strong>🤖 AI trả lời:</strong><br>${window.SCV_AI_CACHE[cacheKey]}`;
+                targetBox.innerHTML = `<strong>🤖 AI trả lời:</strong><br><div id="text_${messageId}">${window.SCV_AI_CACHE[cacheKey]}</div>
+                                       <button class="btn-copy" onclick="copyToClipboard(this, 'text_${messageId}')">📋 Copy kết quả</button>`;
             }
             if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
             return;
@@ -423,10 +457,11 @@
                     window.SCV_AI_CACHE[cacheKey] = formattedResponse;
                     
                     if(targetBox) {
-                        // In thẳng kết quả ra màn hình ngay lập tức
+                        // In thẳng kết quả ra màn hình ngay lập tức và gắn nút Copy
                         targetBox.style.background = 'transparent';
                         targetBox.style.padding = '0';
-                        targetBox.innerHTML = `<strong>🤖 AI Trả lời:</strong><br>${formattedResponse}`;
+                        targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br><div id="text_${messageId}">${formattedResponse}</div>
+                                               <button class="btn-copy" onclick="copyToClipboard(this, 'text_${messageId}')">📋 Copy kết quả</button>`;
                     }
                 } else {
                     if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</span>`;
