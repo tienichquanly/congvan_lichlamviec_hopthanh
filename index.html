@@ -197,6 +197,66 @@
 <div id="global_msg" style="display:none; position:fixed; bottom:20px; right:20px; background:#b91c1c; color:white; padding:15px 25px; border-radius:6px; z-index:9999999; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></div>
 
 <script>
+  // =========================================================================
+  // KHỐI 1: TÍCH HỢP BỘ KẾT NỐI (API BRIDGE)
+  // Tính năng: Vận hành kết nối Fetch API lấy thông số từ ketnoi.js
+  // =========================================================================
+  function createRunner(onSuccess, onFailure) {
+    return {
+      withSuccessHandler: function(cb) { return createRunner(cb, onFailure); },
+      withFailureHandler: function(cb) { return createRunner(onSuccess, cb); },
+      _call: function(funcName, args) {
+        
+        // Đọc đường link Web App từ file ketnoi.js
+        const GAS_URL = typeof SCV_CONFIG_GAS_URL !== 'undefined' ? SCV_CONFIG_GAS_URL : "";
+        
+        if (!GAS_URL) {
+          console.error("❌ Lỗi: Chưa cấu hình link Web App trong ketnoi.js.");
+          if (onFailure) onFailure("Hệ thống chưa tìm thấy đường dẫn kết nối máy chủ!");
+          return;
+        }
+
+        const sysId = window.SCV_GLOBAL_ID || sessionStorage.getItem("SCV_ACTIVE_ID");
+        args.push(sysId); 
+
+        fetch(GAS_URL, {
+          method: 'POST',
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ func: funcName, args: args })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) { if (onSuccess) onSuccess(res.data); }
+          else { if (onFailure) onFailure(res.error); else console.error("Lỗi máy chủ Google:", res.error); }
+        })
+        .catch(err => { if (onFailure) onFailure(err); else console.error("Lỗi kết nối mạng:", err); });
+      },
+      SCV_getInitialData: function() { this._call('SCV_getInitialData', []); },
+      SCV_saveDataLich: function(a) { this._call('SCV_saveDataLich', [a]); },
+      SCV_getDataLich: function(a) { this._call('SCV_getDataLich', [a]); },
+      SCV_deleteLich: function(a,b) { this._call('SCV_deleteLich', [a,b]); }, 
+      SCV_getDmCongVan: function() { this._call('SCV_getDmCongVan', []); },
+      SCV_saveCongVan: function(a,b) { this._call('SCV_saveCongVan', [a,b]); },
+      SCV_getDataCongVan: function(a) { this._call('SCV_getDataCongVan', [a]); },
+      SCV_deleteCongVan: function(a,b) { this._call('SCV_deleteCongVan', [a,b]); }, 
+      SCV_getSubFolders: function(a) { this._call('SCV_getSubFolders', [a]); },
+      SCV_createNewFolder: function(a,b) { this._call('SCV_createNewFolder', [a,b]); },
+      SCV_uploadMultipleFilesToDrive: function(a,b,c,d,e) { this._call('SCV_uploadMultipleFilesToDrive', [a,b,c,d,e]); },
+      SCV_uploadFolderEvidence: function(a,b,c,d,e) { this._call('SCV_uploadFolderEvidence', [a,b,c,d,e]); },
+      SCV_deleteFileByUrl: function(a) { this._call('SCV_deleteFileByUrl', [a]); },
+      SCV_chatWithDocument: function(a,b) { this._call('SCV_chatWithDocument', [a,b]); },
+      SCV_extractLichFromDocument: function(a,b) { this._call('SCV_extractLichFromDocument', [a,b]); },
+      SCV_extractCongVanFromDocument: function(a,b) { this._call('SCV_extractCongVanFromDocument', [a,b]); }
+    };
+  }
+
+  // Khởi tạo đối tượng giả lập google.script.run
+  const google = { script: { get run() { return createRunner(null, null); } } };
+
+  // =========================================================================
+  // KHỐI 2: LOGIC ĐIỀU KHIỂN GIAO DIỆN CHÍNH
+  // Tính năng: Xử lý đăng nhập, cấp quyền và tự động cập nhật hệ thống
+  // =========================================================================
   let GLOBAL_USER = "";
   let GLOBAL_PERM = false; 
 
