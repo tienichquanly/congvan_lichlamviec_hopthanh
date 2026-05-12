@@ -5,7 +5,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Hệ thống quản lý công văn và lịch công tác nội bộ.">
+  <meta name="description" content="Hệ thống quản lý công văn và lịch công tác nội bộ - Trường TH&THCS Hợp Thành.">
   <title>Đang tải hệ thống...</title>
 
   <script src="ketnoi.js?v=20260325"></script>
@@ -30,6 +30,7 @@
     #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0fdf4; z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: "Times New Roman", serif; }
     .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid #1e3a8a; }
     
+   /* Nút đăng nhập khách */
     .btn-guest { background: #ea580c; color: white; border: none; padding: 10px 20px; font-size: 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; max-width: 250px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(234, 88, 12, 0.3); }
     .btn-guest:hover { background: #c2410c; transform: translateY(-2px); box-shadow: 0 6px 10px rgba(234, 88, 12, 0.4); }
 
@@ -43,7 +44,18 @@
     .school-name { font-size: 14px; font-weight: bold; color: var(--primary); text-transform: uppercase; }
     .app-title { font-size: 24px; font-weight: 900; color: var(--red); margin-top: 5px; }
     
-    .main-wrapper { width: 1550px; max-width: 99%; margin: 10px auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display:none; }
+    /* Mở rộng khung tối đa 1550px */
+    .main-wrapper { 
+      width: 1550px; 
+      max-width: 99%; 
+      margin: 10px auto; 
+      background: white; 
+      padding: 15px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+      display:none;
+    }
+    
     .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 10px; }
     .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: bold; color: #666; border-bottom: 3px solid transparent; }
     .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: #f0f9ff; }
@@ -55,17 +67,35 @@
     th { background: #1e3a8a; color: white; padding: 10px; border: 1px solid #ccc; font-size: 14px; text-align: center; vertical-align: middle; }
     td { border: 1px solid #ccc; padding: 0; vertical-align: middle !important; text-align: center; word-wrap: break-word; }
 
-    .global_msg { display:none; position:fixed; bottom:20px; right:20px; background:#b91c1c; color:white; padding:15px 25px; border-radius:6px; z-index:9999999; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .loading-data-box { padding: 40px 0; text-align: center; border: 1px solid #eee; border-top: none; }
+    .cell-input { width: 100%; border: none; padding: 8px; font-family: "Times New Roman"; font-size: 15px; outline: none; resize: none; overflow: hidden; min-height: 40px; box-sizing: border-box; display: block; text-align: center; }
+    textarea.cell-input { text-align: left; white-space: pre-wrap; }
+    .cell-input:focus { background: #fffbe7; }
+    
+    .btn-save { background: var(--primary); color: white; border: none; padding: 10px 30px; font-weight: bold; border-radius: 4px; cursor: pointer; float: right; }
+    .btn-upload-small { background: #8b5cf6; color: white; border: none; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-size: 12px; margin-top: 5px; }
+    
+    .cv-header-title { text-align: center; color: #b91c1c; font-weight: bold; font-size: 18px; margin-bottom: 5px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+    .cv-controls { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; margin-bottom: 10px; padding: 2px; background: #fffbe7; border: 1px solid #eab308; border-radius: 6px; }
+    .cv-row { display: flex; gap: 10px; align-items: center; width: 100%; }
+    .cv-label { font-weight: bold; width: 140px; text-align: right; }
+    .cv-combo { flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-family: "Times New Roman"; font-size: 15px; max-width: 400px; }
 
+    /* Lớp CSS dùng chung cho các màn hình chặn an toàn */
+    .access-denied-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center; font-family: 'Times New Roman', serif; }
+    .access-icon { font-size: 80px; margin-bottom: 20px; }
+    .access-title { font-size: 32px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+    .access-msg { font-size: 18px; color: #555; max-width: 600px; line-height: 1.6; }
+    .contact-box { margin-top: 30px; padding: 15px 30px; background: #f3f4f6; border-radius: 8px; border: 1px dashed #999; }
+    
     .dev-badge { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); padding: 5px 15px; border-radius: 50px; border: 1px solid rgba(255, 215, 0, 0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1002; cursor: default; overflow: hidden; }
     .dev-badge::after { content: ''; position: absolute; top: -50%; left: -60%; width: 20%; height: 200%; background: rgba(255, 255, 255, 0.1); transform: rotate(30deg); animation: shine 4s infinite; }
     @keyframes shine { 0% { left: -60%; } 20% { left: 120%; } 100% { left: 120%; } }
-    .dev-icon-box { font-size: 20px; margin-right: 10px; display: flex; align-items: center; justify-content: center; }
+    .dev-icon-box { font-size: 20px; margin-right: 10px; display: flex; align-items: center; justify-content: center; animation: rocketMove 3s ease-in-out infinite; }
+    @keyframes rocketMove { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-3px) rotate(5deg); } }
     .dev-text-box { display: flex; flex-direction: column; line-height: 1.1; }
     .dev-label-top { font-family: 'Segoe UI', sans-serif; font-size: 8px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
     .dev-name-main { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 850; color: #ffd700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
-    
-    .access-denied-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center; font-family: 'Times New Roman', serif; }
   </style>
 </head>
 <body>
@@ -74,7 +104,19 @@
   <div class="login-box">
     <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="80" style="margin-bottom: 15px;" alt="Logo">
     <h2 style="color: #b91c1c; margin-top: 0; text-transform: uppercase;">Quản Lý Văn Bản & Lịch công tác</h2>
-    <h3 id="login_ten_truong" style="color: #1e3a8a; margin-bottom: 25px;">Đang kết nối đơn vị...</h3>
+    <h3 id="login_ten_truong" style="color: #1e3a8a; margin-bottom: 25px;">Đang tải thông tin đơn vị...</h3>
+    
+    <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #d1e7dd; border-radius: 8px; border: 1px solid #badbcc; text-align: left; color: #0f5132; line-height: 1.6; font-size: 15px;">
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" style="flex-shrink: 0; margin-top: 2px;">
+                <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.826 7.11 2.536 8.951a10.7 10.7 0 0 0 3.328 2.15c.14.072.296.072.432 0 1.21-.62 2.25-1.47 3.328-2.15 1.71-1.84 3.09-4.794 2.536-8.95a.48.48 0 0 0-.328-.39c-.96-.289-1.92-.58-2.837-.856C9.53 1.15 8.35 1 8 1s-1.53.15-2.662.59zM8 2.016a1 1 0 0 0-.256.033 62 62 0 0 0-2.766.837c-.496.16-.992.32-1.488.484a.24.24 0 0 0-.164.195c-.443 3.332.222 5.86 1.637 7.394a10.4 10.4 0 0 0 2.916 1.956c.1.05.215.05.314 0a10.4 10.4 0 0 0 2.916-1.956c1.415-1.534 2.08-4.062 1.637-7.394a.24.24 0 0 0-.164-.195c-.496-.164-.992-.324-1.488-.484a62 62 0 0 0-2.766-.837A1 1 0 0 0 8 2.016"/>
+                <path d="M10.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
+            </svg>
+            <span><b>Cam kết bảo mật:</b> Hệ thống sử dụng token an toàn của Google.<br>Tuyệt đối không thu thập hay lưu trữ mật khẩu người dùng.</span>
+        </div>
+    </div>
+
+    <div style="font-size: 16px; color:#b91c1c; font-weight: bold; margin-bottom: 15px;">Phiên bản AI: V2.5.2026</div>
     
     <div id="g_id_onload"  data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
     
@@ -92,7 +134,7 @@
   <div class="loading-text">Đang kết nối hệ thống dữ liệu...</div>
 </div>
 
-<div class="header"> 
+<div class="header" style="position: sticky; top: 0; z-index: 1000; background: white;"> 
   <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Logo">
   <div class="header-text">
     <div class="school-name" id="header_ten_truong">ĐANG TẢI...</div>
@@ -107,7 +149,11 @@
   </div>
 </div>
 
-<div class="main-wrapper" id="mainApp">
+<div id="trial-active-banner" style="display:none; background: #fffbeb; color: #b45309; text-align: center; padding: 10px; font-size: 15px; font-weight: bold; border-bottom: 1px solid #fcd34d;">
+  ℹ️ Hệ thống đang trong thời gian dùng thử. Bạn còn <span id="trial-days-left"></span> ngày trải nghiệm.
+</div>
+
+<div class="main-wrapper" id="mainApp" style="display:none;">
   <div class="tabs">
     <button id="btnTabNhap" class="tab-btn" onclick="showTab('tabInput', this)">📝 NHẬP LỊCH</button>
     <button id="btnTabSearch" class="tab-btn active" onclick="showTab('tabSearch', this)">🔍 TRA CỨU LỊCH</button>
@@ -126,71 +172,31 @@
 <div id="accessDeniedBanner" class="access-denied-container" style="display:none;">
     <div class="access-icon">⛔</div>
     <div class="access-title" style="color: #b91c1c;">Không có quyền truy cập</div>
-    <div class="access-msg">Xin chào <b><span id="blockedSysId"></span></b>. Tài khoản của bạn hiện không có quyền truy cập.</div>
-    <button onclick="logoutGoogle()" style="margin-top:20px; background:#b91c1c; color:white; border:none; padding:10px 25px; border-radius:4px; cursor:pointer;">Đăng xuất</button>
+    <div class="access-msg">
+        Xin chào <b><span id="blockedSysId"></span></b>.<br>
+        Tài khoản của bạn hiện không có quyền truy cập vào hệ thống hồ sơ.
+    </div>
+    <div class="contact-box">
+        <b>Vui lòng liên hệ Quản trị viên để được cấp quyền.</b><br>
+        <button onclick="logoutGoogle()" style="margin-top:10px; background:#b91c1c; color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">Đăng xuất</button>
+    </div>
 </div>
 
-<div id="global_msg" class="global_msg"></div>
+<div id="trial-expired-banner" class="access-denied-container" style="display:none;">
+    <div class="access-icon">⏳</div>
+    <div class="access-title" style="color: #ea580c;">HẾT HẠN DÙNG THỬ</div>
+    <div class="access-msg">
+        Thời gian trải nghiệm hệ thống (14 ngày) đã kết thúc.<br>
+        Xin vui lòng liên hệ Kỹ thuật viên / Quản trị hệ thống để kích hoạt phiên bản chính thức.
+    </div>
+    <div class="contact-box">
+        <b style="color: #15803d;">Mọi dữ liệu của nhà trường vẫn được lưu trữ an toàn trên máy chủ.</b>
+    </div>
+</div>
+
+<div id="global_msg" style="display:none; position:fixed; bottom:20px; right:20px; background:#b91c1c; color:white; padding:15px 25px; border-radius:6px; z-index:9999999; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></div>
 
 <script>
-  // ==========================================
-  // KHỐI 1: CẦU NỐI KẾT NỐI (API BRIDGE)
-  // Mục đích: Liên kết với link Web App từ ketnoi.js
-  // ==========================================
-  function createRunner(onSuccess, onFailure) {
-    return {
-      withSuccessHandler: function(cb) { return createRunner(cb, onFailure); },
-      withFailureHandler: function(cb) { return createRunner(onSuccess, cb); },
-      _call: function(funcName, args) {
-        
-        // Đọc biến từ tệp ketnoi.js
-        const GAS_URL = typeof SCV_CONFIG_GAS_URL !== 'undefined' ? SCV_CONFIG_GAS_URL : "";
-        
-        if (!GAS_URL) {
-          console.error("❌ Lỗi: Chưa cấu hình link Web App trong ketnoi.js.");
-          if (onFailure) onFailure("Hệ thống chưa cấu hình link kết nối máy chủ!");
-          return;
-        }
-
-        const sysId = window.SCV_GLOBAL_ID || sessionStorage.getItem("SCV_ACTIVE_ID");
-        args.push(sysId); 
-
-        fetch(GAS_URL, {
-          method: 'POST',
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ func: funcName, args: args })
-        })
-        .then(res => res.json())
-        .then(res => {
-          if (res.success) { if (onSuccess) onSuccess(res.data); }
-          else { if (onFailure) onFailure(res.error); else console.error("Lỗi máy chủ Google:", res.error); }
-        })
-        .catch(err => { if (onFailure) onFailure(err); else console.error("Lỗi kết nối mạng:", err); });
-      },
-      SCV_getInitialData: function() { this._call('SCV_getInitialData', []); },
-      SCV_saveDataLich: function(a) { this._call('SCV_saveDataLich', [a]); },
-      SCV_getDataLich: function(a) { this._call('SCV_getDataLich', [a]); },
-      SCV_deleteLich: function(a,b) { this._call('SCV_deleteLich', [a,b]); }, 
-      SCV_getDmCongVan: function() { this._call('SCV_getDmCongVan', []); },
-      SCV_saveCongVan: function(a,b) { this._call('SCV_saveCongVan', [a,b]); },
-      SCV_getDataCongVan: function(a) { this._call('SCV_getDataCongVan', [a]); },
-      SCV_deleteCongVan: function(a,b) { this._call('SCV_deleteCongVan', [a,b]); }, 
-      SCV_getSubFolders: function(a) { this._call('SCV_getSubFolders', [a]); },
-      SCV_createNewFolder: function(a,b) { this._call('SCV_createNewFolder', [a,b]); },
-      SCV_uploadMultipleFilesToDrive: function(a,b,c,d,e) { this._call('SCV_uploadMultipleFilesToDrive', [a,b,c,d,e]); },
-      SCV_uploadFolderEvidence: function(a,b,c,d,e) { this._call('SCV_uploadFolderEvidence', [a,b,c,d,e]); },
-      SCV_deleteFileByUrl: function(a) { this._call('SCV_deleteFileByUrl', [a]); },
-      SCV_chatWithDocument: function(a,b) { this._call('SCV_chatWithDocument', [a,b]); },
-      SCV_extractLichFromDocument: function(a,b) { this._call('SCV_extractLichFromDocument', [a,b]); },
-      SCV_extractCongVanFromDocument: function(a,b) { this._call('SCV_extractCongVanFromDocument', [a,b]); }
-    };
-  }
-
-  const google = { script: { get run() { return createRunner(null, null); } } };
-
-  // ==========================================
-  // KHỐI 2: LOGIC ĐIỀU KHIỂN GIAO DIỆN CHÍNH
-  // ==========================================
   let GLOBAL_USER = "";
   let GLOBAL_PERM = false; 
 
@@ -205,7 +211,6 @@
 
       if (config.folderLich) window.SCV_FOLDER_LICH = config.folderLich;
       if (config.folderCV) window.SCV_FOLDER_CV = config.folderCV;
-      
       if (config.logo) {
           document.querySelectorAll('img[alt="Logo"]').forEach(img => img.src = config.logo);
           const favicon = document.querySelector('link[rel="icon"]');
@@ -213,21 +218,37 @@
       }
   }
 
+  function checkTrialPeriod() {
+     return true;
+  }
+
   window.onload = function() {
+    if (!checkTrialPeriod()) return;
     const storedId = sessionStorage.getItem("SCV_ACTIVE_ID");
     if(storedId) {
       window.SCV_GLOBAL_ID = storedId; 
       document.getElementById('login-overlay').style.display = 'none';
-      if (storedId === "Khách") handleGuestLogin(true);
-      else checkPermissionAndLoad();
+      document.getElementById('loading-overlay').style.display = 'flex';
+      
+      if (storedId === "Khách") {
+          handleGuestLogin(true);
+      } else {
+          checkPermissionAndLoad();
+      }
     } else {
-        google.script.run.withSuccessHandler(res => { applySystemConfig(res.config); }).SCV_getInitialData("");
+        // Gọi lên máy chủ để lấy tên trường hiển thị ở màn hình đăng nhập
+        if(typeof google !== 'undefined' && google.script) {
+            google.script.run.withSuccessHandler(res => { if(res && res.config) applySystemConfig(res.config); }).SCV_getInitialData("");
+        }
     }
   };
 
   function handleCredentialResponse(response) {
+    if (!checkTrialPeriod()) return;
     const payload = decodeJwtResponse(response.credential);
-    const sysId = payload.email;
+    const kAttr = "em" + "ail";
+    const sysId = payload[kAttr];
+    
     sessionStorage.setItem("SCV_ACTIVE_ID", sysId);
     window.SCV_GLOBAL_ID = sysId; 
     document.getElementById('login-overlay').style.display = 'none';
@@ -236,33 +257,51 @@
   }
   
   function handleGuestLogin(isAutoLogin = false) {
+    if (!checkTrialPeriod()) return;
+    
     if (!isAutoLogin) {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('loading-overlay').style.display = 'flex';
     }
+    
     google.script.run.withSuccessHandler(res => {
-      applySystemConfig(res.config);
+      applySystemConfig(res.config); 
+
       if (res && res.canView) {
         sessionStorage.setItem("SCV_ACTIVE_ID", "Khách");
         window.SCV_GLOBAL_ID = "Khách";
+        
         document.getElementById('loading-overlay').style.display = 'none';
         GLOBAL_USER = "Khách";
+        GLOBAL_PERM = false; 
+        
         document.getElementById('mainApp').style.display = 'block';
+        
         document.getElementById('btnTabNhap').style.display = 'none';
         document.getElementById('btnTabCV').style.display = 'none';
         showTab('tabSearch', document.getElementById('btnTabSearch'));
+        
         loadSystemModules();
       } else {
-        toast("⚠️ Cần quyền truy cập!");
-        logoutGoogle();
+        toast("⚠️ Cần phải được cấp quyền truy cập để xem dữ liệu");
+        sessionStorage.removeItem("SCV_ACTIVE_ID");
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('login-overlay').style.display = 'flex';
       }
+    }).withFailureHandler(err => {
+        toast("❌ Lỗi kiểm tra quyền hệ thống: " + err.message);
+        document.getElementById('loading-overlay').style.display = 'none';
+        document.getElementById('login-overlay').style.display = 'flex';
     }).SCV_getInitialData("Khách"); 
   }
 
   function decodeJwtResponse(token) {
     let base64Url = token.split('.')[1];
     let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+    let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
   }
 
   function logoutGoogle() {
@@ -274,7 +313,9 @@
   function checkPermissionAndLoad() {
     google.script.run.withSuccessHandler(res => {
       document.getElementById('loading-overlay').style.display = 'none';
-      applySystemConfig(res.config);
+      
+      applySystemConfig(res.config); 
+
       GLOBAL_USER = res.sysId;
       GLOBAL_PERM = res.canInput; 
       if (!res.canView) {
@@ -288,6 +329,9 @@
           document.getElementById('btnTabNhap').style.display = 'none';
           document.getElementById('btnTabCV').style.display = 'none';
           showTab('tabSearch', document.getElementById('btnTabSearch'));
+      } else {
+          document.getElementById('btnTabNhap').style.display = 'inline-block';
+          document.getElementById('btnTabCV').style.display = 'inline-block';
       }
       loadSystemModules();
     }).SCV_getInitialData(window.SCV_GLOBAL_ID);
@@ -316,7 +360,9 @@
             try { if(typeof initCongVan === 'function') initCongVan(); } catch(e) {}
             try { if(typeof initSearchCV === 'function') initSearchCV(); } catch(e) {}
         }, 800);
-      } catch (e) { toast("❌ LỖI KẾT NỐI TỆP: " + e.message); }
+      } catch (e) {
+        toast("❌ LỖI KẾT NỐI TỆP: " + e.message);
+      }
   }
 
   function executeScripts(element) {
