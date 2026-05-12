@@ -72,7 +72,6 @@
 </div>
 
 <script>
-    // BỔ SUNG: Khởi tạo bộ nhớ đệm toàn cục để lưu kết quả trích xuất của AI
     window.SCV_EXTRACT_CACHE = window.SCV_EXTRACT_CACHE || {};
 
     function initCongVan() {
@@ -161,26 +160,18 @@
         }
     }
 
-    const ID_FOLDER_CONGVAN = '1c8O5Dq5hq5glPo10GNBoP1din-S-Zeq4';
-    
+    // ĐÃ BỎ GÁN CỨNG: Lấy dữ liệu ID thư mục động từ bộ nhớ hệ thống
     function openUploadCV(btn) {
        const container = btn.parentElement;
        const linkCu = container.querySelector('.val-link').value || "";
+       const idFolder = window.SCV_FOLDER_CV || ''; // Đã xử lý lấy từ máy chủ
        if(typeof SCV_OpenUploadModal === 'function') {
-           SCV_OpenUploadModal(btn, linkCu, ID_FOLDER_CONGVAN);
+           SCV_OpenUploadModal(btn, linkCu, idFolder);
        } else { alert("Lỗi: Module upload chưa được tải!"); }
     }
 
-    // ==========================================================
-    // KHỐI XỬ LÝ TRỢ LÝ AI: TÌM VĂN BẢN CHÍNH (CÔNG VĂN)
-    // CẬP NHẬT: Tích hợp Bộ nhớ đệm và Hiệu ứng gõ máy chữ
-    // ==========================================================
-    
-    // Hàm phụ trợ: Tạo hiệu ứng AI đang trực tiếp điền vào Form
     function typeWriterFormFill(tr, aiData) {
         const inputs = tr.querySelectorAll('.cell-input');
-        
-        // Chuẩn bị dữ liệu đích
         const targets = [
             { el: inputs[0], text: aiData.ngay_bh || "" },
             { el: inputs[1], text: aiData.ky_hieu || "" },
@@ -188,28 +179,19 @@
             { el: inputs[3], text: aiData.noi_ban_hanh || "" }
         ];
 
-        // Xóa trắng các ô nhập liệu trước khi AI bắt đầu "gõ"
         targets.forEach(t => t.el.value = "");
 
         function typing() {
             let stillTyping = false;
             targets.forEach(t => {
                 if (t.el.value.length < t.text.length) {
-                    // Thêm từng ký tự một vào ô
                     t.el.value += t.text.charAt(t.el.value.length);
-                    // Tự động co giãn chiều cao của Textarea khi AI gõ xuống dòng
                     if(t.el.tagName === 'TEXTAREA') autoResize(t.el); 
                     stillTyping = true;
                 }
             });
-
-            // Nếu vẫn còn chữ để gõ, tiếp tục gọi hàm sau 10ms (tốc độ gõ cực nhanh)
-            if (stillTyping) {
-                setTimeout(typing, 10);
-            }
+            if (stillTyping) { setTimeout(typing, 10); }
         }
-        
-        // Bắt đầu gõ
         typing();
     }
 
@@ -223,7 +205,6 @@
             return;
         }
 
-        // KIỂM TRA BỘ NHỚ ĐỆM: Nếu file này AI đã đọc rồi, nạp ngay kết quả từ RAM
         const cacheKey = "EXTRACT_" + linkStr;
         if (window.SCV_EXTRACT_CACHE[cacheKey]) {
             typeWriterFormFill(tr, window.SCV_EXTRACT_CACHE[cacheKey]);
@@ -255,18 +236,10 @@ YÊU CẦU BẮT BUỘC:
             if (res && res.success) {
                 try {
                     let aiData = JSON.parse(res.message);
-                    
-                    if (Array.isArray(aiData) && aiData.length > 0) {
-                        aiData = aiData[0];
-                    }
-
-                    // Lưu kết quả JSON vào bộ nhớ đệm để tái sử dụng
+                    if (Array.isArray(aiData) && aiData.length > 0) { aiData = aiData[0]; }
                     window.SCV_EXTRACT_CACHE[cacheKey] = aiData;
-
-                    // Gọi hàm điền Form bằng hiệu ứng gõ phím
                     typeWriterFormFill(tr, aiData);
                     toast("✨ AI đã phân tích và điền văn bản chính thành công!");
-                    
                 } catch (e) {
                     toast("⚠️ Lỗi trích xuất cấu trúc dữ liệu. Vui lòng thử lại!");
                 }
