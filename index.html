@@ -8,6 +8,7 @@
   <meta name="description" content="Hệ thống quản lý công văn và lịch công tác nội bộ.">
   <title>Đang tải hệ thống...</title>
 
+  <script src="ketnoi.js?v=20260325"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
@@ -133,18 +134,20 @@
 
 <script>
   // ==========================================
-  // KHỐI 1: CẤU HÌNH KẾT NỐI MÁY CHỦ (API BRIDGE)
+  // KHỐI 1: CẦU NỐI KẾT NỐI (API BRIDGE)
+  // Mục đích: Liên kết với link Web App từ ketnoi.js
   // ==========================================
-  // Đồng chí thay đổi link Web App tại biến dưới đây khi cần thiết:
-  const SCV_CONFIG_GAS_URL = 'https://script.google.com/macros/s/AKfycbxQNLrkoHnxF81IO_QmB7rcIdjQhavLWNG6fy3VngBeR_2xG8rHxJAlrJLcAs_szZO9/exec';
-  
   function createRunner(onSuccess, onFailure) {
     return {
       withSuccessHandler: function(cb) { return createRunner(cb, onFailure); },
       withFailureHandler: function(cb) { return createRunner(onSuccess, cb); },
       _call: function(funcName, args) {
-        if (!SCV_CONFIG_GAS_URL) {
-          console.error("❌ Lỗi: Chưa cấu hình link Web App.");
+        
+        // Đọc biến từ tệp ketnoi.js
+        const GAS_URL = typeof SCV_CONFIG_GAS_URL !== 'undefined' ? SCV_CONFIG_GAS_URL : "";
+        
+        if (!GAS_URL) {
+          console.error("❌ Lỗi: Chưa cấu hình link Web App trong ketnoi.js.");
           if (onFailure) onFailure("Hệ thống chưa cấu hình link kết nối máy chủ!");
           return;
         }
@@ -152,7 +155,7 @@
         const sysId = window.SCV_GLOBAL_ID || sessionStorage.getItem("SCV_ACTIVE_ID");
         args.push(sysId); 
 
-        fetch(SCV_CONFIG_GAS_URL, {
+        fetch(GAS_URL, {
           method: 'POST',
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ func: funcName, args: args })
