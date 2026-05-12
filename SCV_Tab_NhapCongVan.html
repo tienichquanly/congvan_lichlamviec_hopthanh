@@ -164,7 +164,7 @@
     function openUploadCV(btn) {
        const container = btn.parentElement;
        const linkCu = container.querySelector('.val-link').value || "";
-       const idFolder = window.SCV_FOLDER_CV || '1c8O5Dq5hq5glPo10GNBoP1din-S-Zeq4';
+       const idFolder = window.SCV_FOLDER_CV;
        if(typeof SCV_OpenUploadModal === 'function') {
            SCV_OpenUploadModal(btn, linkCu, idFolder);
        } else { alert("Lỗi: Module upload chưa được tải!"); }
