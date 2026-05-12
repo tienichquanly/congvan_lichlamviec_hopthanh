@@ -19,8 +19,10 @@
   
   <input type="text" id="f_ContentLich" placeholder="🔍 Tìm nội dung, chủ trì, địa điểm..." style="flex:1; min-width:200px; padding:6px; font-family:'Times New Roman'; font-size:15px; border:1px solid #ccc; border-radius:4px;" onkeydown="checkEnterLich(event)">
   
-  <input type="text" id="f_ThanhPhan" placeholder="👤 Tổng hợp theo tên..." style="flex:1; min-width:160px; padding:6px; font-family:'Times New Roman'; font-size:15px; border:1px solid #1e3a8a; border-radius:4px; background:#f8fafc;" onkeyup="filterLichLocal()">
+  <input type="text" id="f_ThanhPhan" placeholder="👤 Tổng hợp theo tên..." style="flex:1; min-width:160px; padding:6px; font-family:'Times New Roman'; font-size:15px; border:1px solid #1e3a8a; border-radius:4px; background:#f8fafc;" onkeydown="checkEnterLich(event)">
+  
   <span id="stat_SoBuoi" style="font-family:'Times New Roman'; font-size:15px; font-weight:bold; color:#b91c1c; white-space:nowrap; padding: 0 5px;">Thống kê: 0 buổi</span>
+  
   <button onclick="loadDataServer()" style="background:#1e3a8a; color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-family:'Times New Roman'; font-size:15px; font-weight:bold; white-space:nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
       🔍 Xem Lịch
   </button>
@@ -52,7 +54,6 @@
 </div>
 
 <script>
-  let fullData = [];
   let IS_AUTH_LICH = false; 
 
   function initTabLich() {
@@ -65,15 +66,9 @@
           const st = document.getElementById('status_search_lich');
           if(st) st.innerHTML = "👤 " + userName;
  
-          // Cập nhật hiển thị cột ngay khi xác thực xong
           const disp = IS_AUTH_LICH ? '' : 'none';
           if (document.getElementById('colSuaLich')) document.getElementById('colSuaLich').style.display = disp;
           if (document.getElementById('thSuaLich')) document.getElementById('thSuaLich').style.display = disp;
-          
-          // Bẫy lỗi 3: Nếu dữ liệu tải xong nhanh hơn quyền xác thực, vẽ lại bảng để khớp cột
-          if (fullData && fullData.length > 0) {
-              filterLichLocal();
-          }
       }).SCV_getInitialData();
   }
 
@@ -96,14 +91,17 @@
 
   function loadDataServer() {
       const tbody = document.getElementById('bodyView');
-      const dFrom = document.getElementById('dFrom').value;
-      const dTo = document.getElementById('dTo').value;
-      const fContent = document.getElementById('f_ContentLich').value.trim();
-      const fThanhPhan = document.getElementById('f_ThanhPhan').value.trim();
-      const conditionString = dFrom + dTo + fContent + fThanhPhan;
       
-      if (!conditionString) {
-          tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">⚠️ Vui lòng chọn khoảng thời gian!</td></tr>';
+      // ĐÓNG GÓI CHUẨN JSON ĐỂ GỬI LÊN MÁY CHỦ LỌC
+      const filtersObj = {
+          tuNgay: document.getElementById('dFrom').value,
+          denNgay: document.getElementById('dTo').value,
+          noiDung: document.getElementById('f_ContentLich').value.trim(),
+          thanhPhan: document.getElementById('f_ThanhPhan').value.trim()
+      };
+      
+      if (!filtersObj.tuNgay && !filtersObj.denNgay && !filtersObj.noiDung && !filtersObj.thanhPhan) {
+          tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">⚠️ Vui lòng chọn ít nhất 1 điều kiện!</td></tr>';
           return;
       }
       
@@ -113,83 +111,38 @@
           <tr>
               <td colspan="${colSpanNum}" class="text-center" style="padding:30px; border: 1px solid #ccc !important;">
                   <div style="display:inline-block; width:30px; height:30px; border:4px solid #ccc; border-top:4px solid #1e3a8a; border-radius:50%; animation:spin 1s linear infinite;"></div>
-                  <div style="margin-top:10px; color:#1e3a8a;">Đang tải dữ liệu lịch...</div>
+                  <div style="margin-top:10px; color:#1e3a8a; font-weight:bold;">Đang quét kho dữ liệu lịch trên hệ thống...</div>
               </td>
           </tr>`;
           
       google.script.run
-        .withSuccessHandler(data => {
-            let cleanData = data.filter(row => { return row && row[2] && String(row[2]).trim() !== ""; });
-            cleanData.sort((a, b) => { 
-                const timeA = parseDateTime(a[0], a[1]); 
-                const timeB = parseDateTime(b[0], b[1]); 
-                return timeB - timeA; 
-            });
+        .withSuccessHandler(response => {
+            if(response.error) {
+                tbody.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">❌ Lỗi: ${response.error}</td></tr>`;
+                return;
+            }
+
+            const statEl = document.getElementById('stat_SoBuoi');
+            if(statEl) statEl.innerHTML = `Thống kê: ${response.totalFound} buổi`;
+
+            const st = document.getElementById('status_search_lich');
+            if (st) {
+                let text = `✅ Tìm thấy: <strong style="color:#e11d48;">${response.totalFound}</strong> lịch công tác.`;
+                if (response.limitApplied) {
+                    text += ` <em>(Chỉ hiển thị 200 lịch mới nhất để chống quá tải)</em>`;
+                }
+                st.innerHTML = text;
+            }
             
-            fullData = cleanData;
-            filterLichLocal(); 
+            renderTable(response.data); 
         })
         .withFailureHandler(err => {
-            tbody.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">❌ Lỗi tải dữ liệu: ${err}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">❌ Lỗi kết nối máy chủ: ${err}</td></tr>`;
         })
-        .SCV_getDataLich(conditionString);
-  }
-
-  function filterLichLocal() {
-      const fStr = document.getElementById('dFrom').value; 
-      const tStr = document.getElementById('dTo').value;
-      const fTxt = document.getElementById('f_ContentLich').value.toLowerCase().trim();
-      const fName = document.getElementById('f_ThanhPhan').value.toLowerCase().trim();
-
-      const strToDate = (s) => { 
-          if(!s) return null; 
-          const p = s.split('/');
-          if(p.length < 3) return null; 
-          const d = parseInt(p[0]), m = parseInt(p[1]), y = parseInt(p[2]);
-          if (isNaN(d) || isNaN(m) || isNaN(y)) return null; 
-          const dateObj = new Date(y, m-1, d); 
-          dateObj.setHours(0,0,0,0); 
-          return dateObj; 
-      };
-      
-      const dFrom = strToDate(fStr); 
-      const dTo = strToDate(tStr);
-      const contentWords = fTxt ? fTxt.split(/\s+/) : [];
-
-      const res = fullData.filter(r => {
-          if(!r[0]) return false; 
-          const dRow = strToDate(r[0]); 
-          if(!dRow) return false;
-          
-          if(dFrom && dRow.getTime() < dFrom.getTime()) return false;
-          if(dTo && dRow.getTime() > dTo.getTime()) return false;
-          
-          if(contentWords.length > 0) {
-              const content = (r[2] + " " + r[3] + " " + r[4] + " " + r[5]).toLowerCase();
-              for (let i = 0; i < contentWords.length; i++) {
-                  if(!content.includes(contentWords[i])) return false;
-              }
-          }
-          
-          if(fName) {
-              const thanhPhan = String(r[5] || "").toLowerCase();
-              if(!thanhPhan.includes(fName)) return false;
-          }
-          
-          return true;
-      });
-      
-      const statEl = document.getElementById('stat_SoBuoi');
-      if(statEl) statEl.innerHTML = `Thống kê: ${res.length} buổi`;
-
-      const st = document.getElementById('status_search_lich');
-      if(st) st.innerHTML = `✅ Tìm thấy: ${res.length} lịch công tác`;
-
-      renderTable(res);
+        .SCV_getDataLich(filtersObj);
   }
 
   function renderTable(data) {
-    // Bẫy lỗi 4: Ép buộc đồng bộ tiêu đề và khung cột TRƯỚC khi đổ dữ liệu dòng vào
     const disp = IS_AUTH_LICH ? '' : 'none';
     if (document.getElementById('colSuaLich')) document.getElementById('colSuaLich').style.display = disp;
     if (document.getElementById('thSuaLich')) document.getElementById('thSuaLich').style.display = disp;
@@ -219,10 +172,6 @@
        const centerStyle = 'text-align: center; vertical-align: middle; padding: 8px; word-wrap: break-word; border: 1px solid #ccc !important;';
        const leftStyle   = 'text-align: left !important; vertical-align: middle; padding: 8px; padding-left: 8px; word-wrap: break-word; white-space: pre-wrap; border: 1px solid #ccc !important;';
        
-       /* ========================================================================= */
-       /* [ĐÃ SỬA LỖI]: Bổ sung .replace(/'/g, "%27") để thay thế dấu nháy đơn,     */
-       /* ngăn chặn việc chuỗi JSON phá vỡ cấu trúc nháy đơn của lệnh HTML onclick. */
-       /* ========================================================================= */
        const rowDataString = encodeURIComponent(JSON.stringify(r)).replace(/'/g, "%27");
        
        let styleSua = IS_AUTH_LICH ? centerStyle : 'display: none;';
@@ -254,11 +203,11 @@
                tr.style.transition = 'opacity 0.5s'; 
                tr.style.opacity = '0';
                setTimeout(() => tr.remove(), 500);
-               toast("✅ Đã chuyển dữ liệu sang tab [NHẬP LỊCH CÔNG TÁC].");
+               if(typeof toast === 'function') toast("✅ Đã chuyển dữ liệu sang tab [NHẬP LỊCH CÔNG TÁC].");
            } else {
-               toast("❌ Lỗi: Không tìm thấy hàm điền dữ liệu.");
+               if(typeof toast === 'function') toast("❌ Lỗi: Không tìm thấy hàm điền dữ liệu.");
            }
-       } catch(e) { console.error(e); toast("❌ Lỗi đọc dữ liệu!"); }
+       } catch(e) { console.error(e); if(typeof toast === 'function') toast("❌ Lỗi đọc dữ liệu!"); }
   }
 
   function formatDate(elm) { 
@@ -269,19 +218,6 @@
       if (v.length > 2) o += '/' + v.substring(2,4); 
       if (v.length > 4) o += '/' + v.substring(4,8);
       elm.value = o; 
-  }
-  
-  function parseDateTime(dStr, tStr) { 
-      if(!dStr) return 0;
-      try { 
-          const d = dStr.split('/');
-          let h = 0, m = 0; 
-          if(tStr && String(tStr).includes(':')) { 
-              const t = String(tStr).split(':');
-              h = parseInt(t[0]) || 0; m = parseInt(t[1]) || 0;
-          } else if (tStr && !isNaN(tStr)) { h = parseInt(tStr) || 0; } 
-          return new Date(d[2], d[1]-1, d[0], h, m).getTime();
-      } catch(e) { return 0; } 
   }
   
   initTabLich();
