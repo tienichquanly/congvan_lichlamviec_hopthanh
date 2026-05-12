@@ -8,7 +8,6 @@
   <meta name="description" content="Hệ thống quản lý công văn và lịch công tác nội bộ.">
   <title>Đang tải hệ thống...</title>
 
-  <script src="ketnoi.js?v=20260325"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
@@ -74,7 +73,7 @@
   <div class="login-box">
     <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="80" style="margin-bottom: 15px;" alt="Logo">
     <h2 style="color: #b91c1c; margin-top: 0; text-transform: uppercase;">Quản Lý Văn Bản & Lịch công tác</h2>
-    <h3 id="login_ten_truong" style="color: #1e3a8a; margin-bottom: 25px;">Đang tải thông tin đơn vị...</h3>
+    <h3 id="login_ten_truong" style="color: #1e3a8a; margin-bottom: 25px;">Đang kết nối đơn vị...</h3>
     
     <div id="g_id_onload"  data-client_id="407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
     
@@ -133,24 +132,77 @@
 <div id="global_msg" class="global_msg"></div>
 
 <script>
+  // ==========================================
+  // KHỐI 1: CẤU HÌNH KẾT NỐI MÁY CHỦ (API BRIDGE)
+  // ==========================================
+  // Đồng chí thay đổi link Web App tại biến dưới đây khi cần thiết:
+  const SCV_CONFIG_GAS_URL = 'https://script.google.com/macros/s/AKfycbxQNLrkoHnxF81IO_QmB7rcIdjQhavLWNG6fy3VngBeR_2xG8rHxJAlrJLcAs_szZO9/exec';
+  
+  function createRunner(onSuccess, onFailure) {
+    return {
+      withSuccessHandler: function(cb) { return createRunner(cb, onFailure); },
+      withFailureHandler: function(cb) { return createRunner(onSuccess, cb); },
+      _call: function(funcName, args) {
+        if (!SCV_CONFIG_GAS_URL) {
+          console.error("❌ Lỗi: Chưa cấu hình link Web App.");
+          if (onFailure) onFailure("Hệ thống chưa cấu hình link kết nối máy chủ!");
+          return;
+        }
+
+        const sysId = window.SCV_GLOBAL_ID || sessionStorage.getItem("SCV_ACTIVE_ID");
+        args.push(sysId); 
+
+        fetch(SCV_CONFIG_GAS_URL, {
+          method: 'POST',
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ func: funcName, args: args })
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) { if (onSuccess) onSuccess(res.data); }
+          else { if (onFailure) onFailure(res.error); else console.error("Lỗi máy chủ Google:", res.error); }
+        })
+        .catch(err => { if (onFailure) onFailure(err); else console.error("Lỗi kết nối mạng:", err); });
+      },
+      SCV_getInitialData: function() { this._call('SCV_getInitialData', []); },
+      SCV_saveDataLich: function(a) { this._call('SCV_saveDataLich', [a]); },
+      SCV_getDataLich: function(a) { this._call('SCV_getDataLich', [a]); },
+      SCV_deleteLich: function(a,b) { this._call('SCV_deleteLich', [a,b]); }, 
+      SCV_getDmCongVan: function() { this._call('SCV_getDmCongVan', []); },
+      SCV_saveCongVan: function(a,b) { this._call('SCV_saveCongVan', [a,b]); },
+      SCV_getDataCongVan: function(a) { this._call('SCV_getDataCongVan', [a]); },
+      SCV_deleteCongVan: function(a,b) { this._call('SCV_deleteCongVan', [a,b]); }, 
+      SCV_getSubFolders: function(a) { this._call('SCV_getSubFolders', [a]); },
+      SCV_createNewFolder: function(a,b) { this._call('SCV_createNewFolder', [a,b]); },
+      SCV_uploadMultipleFilesToDrive: function(a,b,c,d,e) { this._call('SCV_uploadMultipleFilesToDrive', [a,b,c,d,e]); },
+      SCV_uploadFolderEvidence: function(a,b,c,d,e) { this._call('SCV_uploadFolderEvidence', [a,b,c,d,e]); },
+      SCV_deleteFileByUrl: function(a) { this._call('SCV_deleteFileByUrl', [a]); },
+      SCV_chatWithDocument: function(a,b) { this._call('SCV_chatWithDocument', [a,b]); },
+      SCV_extractLichFromDocument: function(a,b) { this._call('SCV_extractLichFromDocument', [a,b]); },
+      SCV_extractCongVanFromDocument: function(a,b) { this._call('SCV_extractCongVanFromDocument', [a,b]); }
+    };
+  }
+
+  const google = { script: { get run() { return createRunner(null, null); } } };
+
+  // ==========================================
+  // KHỐI 2: LOGIC ĐIỀU KHIỂN GIAO DIỆN CHÍNH
+  // ==========================================
   let GLOBAL_USER = "";
   let GLOBAL_PERM = false; 
 
   function applySystemConfig(config) {
       if (!config) return;
       
-      // 1. ĐỒNG BỘ TÊN TRƯỜNG
       if (config.tenTruong) {
           if(document.getElementById('header_ten_truong')) document.getElementById('header_ten_truong').innerText = config.tenTruong;
           if(document.getElementById('login_ten_truong')) document.getElementById('login_ten_truong').innerText = config.tenTruong;
           document.title = "Quản lý Công văn & Lịch - " + config.tenTruong;
       }
 
-      // 2. ĐỒNG BỘ ID THƯ MỤC
       if (config.folderLich) window.SCV_FOLDER_LICH = config.folderLich;
       if (config.folderCV) window.SCV_FOLDER_CV = config.folderCV;
       
-      // 3. ĐỒNG BỘ LOGO
       if (config.logo) {
           document.querySelectorAll('img[alt="Logo"]').forEach(img => img.src = config.logo);
           const favicon = document.querySelector('link[rel="icon"]');
@@ -166,7 +218,6 @@
       if (storedId === "Khách") handleGuestLogin(true);
       else checkPermissionAndLoad();
     } else {
-        // Tải trước thông tin cấu hình cho màn hình đăng nhập
         google.script.run.withSuccessHandler(res => { applySystemConfig(res.config); }).SCV_getInitialData("");
     }
   };
@@ -280,6 +331,8 @@
     document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     btn.classList.add('active');
+    if(id === 'tabSearch') if(typeof loadDataServer === 'function') loadDataServer();
+    if(id === 'tabSearchCongVan') if(typeof loadDataSearchCV === 'function') loadDataSearchCV();
   }
   
   function toast(msg) {
