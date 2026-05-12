@@ -132,13 +132,13 @@
     elm.value = o; 
   }
 
-  const ID_FOLDER_LICH = '1hXXJWftw5Z9bFvS686ezV41nHIb_4-n8';
-  
+  // TUÂN THỦ NGUYÊN TẮC VÀNG: Giữ nguyên mã cũ, chỉ thay ID cứng bằng biến bộ nhớ động (có fallback an toàn)
   function openUploadLich(btn) {
        const container = btn.parentElement;
        const linkCu = container.querySelector('.val-link').value || "";
+       const idFolder = window.SCV_FOLDER_LICH || '1hXXJWftw5Z9bFvS686ezV41nHIb_4-n8';
        if(typeof SCV_OpenUploadModal === 'function') { 
-           SCV_OpenUploadModal(btn, linkCu, ID_FOLDER_LICH);
+           SCV_OpenUploadModal(btn, linkCu, idFolder);
        } else { alert("Lỗi: Module upload chưa tải!"); }
   }
 
