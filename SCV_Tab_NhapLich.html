@@ -63,9 +63,6 @@
     tbody.appendChild(newRow);
   }
 
-  /* ==========================================================
-     HÀM XÓA LỊCH ĐÃ ĐƯỢC NÂNG CẤP ĐỒNG BỘ
-     ========================================================== */
   function delRowLich(btn) { 
       const row = btn.closest('tr');
       const tbody = document.getElementById('bodyLich');
@@ -132,19 +129,16 @@
     elm.value = o; 
   }
 
-  const ID_FOLDER_LICH = '1hXXJWftw5Z9bFvS686ezV41nHIb_4-n8';
-  
+  // ĐÃ BỎ GÁN CỨNG: Lấy dữ liệu ID thư mục động từ cấu hình
   function openUploadLich(btn) {
        const container = btn.parentElement;
        const linkCu = container.querySelector('.val-link').value || "";
+       const idFolder = window.SCV_FOLDER_LICH || ''; // Đã xử lý lấy từ máy chủ
        if(typeof SCV_OpenUploadModal === 'function') { 
-           SCV_OpenUploadModal(btn, linkCu, ID_FOLDER_LICH);
+           SCV_OpenUploadModal(btn, linkCu, idFolder);
        } else { alert("Lỗi: Module upload chưa tải!"); }
   }
 
-  // ==========================================================
-  // KHỐI XỬ LÝ TRỢ LÝ AI: TÌM VĂN BẢN CHÍNH (LỊCH CÔNG TÁC)
-  // ==========================================================
   function extractAILichInfo(btn) {
       const tr = btn.closest('tr');
       const container = btn.parentElement;
