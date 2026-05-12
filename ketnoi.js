@@ -8,6 +8,11 @@
 // THẦY HÃY THAY ĐƯỜNG LINK DƯỚI ĐÂY BẰNG LINK WEB APP (đuôi /exec) CỦA THẦY:
 //const GAS_URL = "https://script.google.com/macros/s/AKfycbxQNLrkoHnxF81IO_QmB7rcIdjQhavLWNG6fy3VngBeR_2xG8rHxJAlrJLcAs_szZO9/exec";
 const GAS_URL = typeof SCV_LINK_WEBAPP !== 'undefined' ? SCV_LINK_WEBAPP : "";
+if (!GAS_URL) {
+                console.error("❌ Lỗi: Chưa cấu hình link Web App trong file SCV_CauHinh_Web.js");
+                if (onFailure) onFailure("Chưa có link kết nối máy chủ!");
+                return;
+            }
 // Khởi tạo luồng xử lý độc lập cho từng yêu cầu giao tiếp an toàn
 function createRunner(onSuccess, onFailure) {
     return {
