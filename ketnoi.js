@@ -1,19 +1,10 @@
 /**
  * INTERNAL API BRIDGE - TRƯỜNG TH&THCS HỢP THÀNH
  * Mục đích: Cầu nối giao tiếp (Fetch API) giữa giao diện Web App và Google Apps Script.
- * Hệ thống quản trị công văn và lịch công tác nội bộ.
- * Phiên bản: An toàn hóa định danh V3 & Tích hợp AI Đa luồng
+ * Phiên bản: An toàn hóa định danh V3.1 - Dynamic URL Binding
  */
 
-// THẦY HÃY THAY ĐƯỜNG LINK DƯỚI ĐÂY BẰNG LINK WEB APP (đuôi /exec) CỦA THẦY:
-//const GAS_URL = "https://script.google.com/macros/s/AKfycbxQNLrkoHnxF81IO_QmB7rcIdjQhavLWNG6fy3VngBeR_2xG8rHxJAlrJLcAs_szZO9/exec";
-const GAS_URL = typeof SCV_LINK_WEBAPP !== 'undefined' ? SCV_LINK_WEBAPP : "";
-if (!GAS_URL) {
-                console.error("❌ Lỗi: Chưa cấu hình link Web App trong file SCV_CauHinh_Web.js");
-                if (onFailure) onFailure("Chưa có link kết nối máy chủ!");
-                return;
-            }
-// Khởi tạo luồng xử lý độc lập cho từng yêu cầu giao tiếp an toàn
+// Hàm khởi tạo luồng xử lý độc lập cho từng yêu cầu giao tiếp
 function createRunner(onSuccess, onFailure) {
     return {
         withSuccessHandler: function(cb) {
@@ -23,7 +14,15 @@ function createRunner(onSuccess, onFailure) {
             return createRunner(onSuccess, cb);
         },
         _call: function(funcName, args) {
-            // Đính kèm Token/Định danh người dùng hiện tại để Google Apps Script xác thực quyền hạn
+            // KIỂM TRA LINK KẾT NỐI TỪ FILE CẤU HÌNH CỤC BỘ
+            const GAS_URL = typeof SCV_CONFIG_GAS_URL !== 'undefined' ? SCV_CONFIG_GAS_URL : "";
+            
+            if (!GAS_URL) {
+                console.error("❌ Lỗi: Chưa cấu hình link Web App trong file SCV_CauHinh_Web.js");
+                if (onFailure) onFailure("Chưa có link kết nối máy chủ!");
+                return;
+            }
+
             const sysId = window.SCV_GLOBAL_ID || sessionStorage.getItem("SCV_ACTIVE_ID");
             args.push(sysId); 
 
@@ -46,7 +45,7 @@ function createRunner(onSuccess, onFailure) {
                 else console.error("Lỗi mất kết nối:", err);
             });
         },
-        // Danh sách các API tiêu chuẩn được phép gọi (Đồng bộ với whitelist trên GAS)
+        // Danh sách các API tiêu chuẩn đồng bộ với Whitelist trên Server
         SCV_getInitialData: function() { this._call('SCV_getInitialData', []); },
         SCV_saveDataLich: function(a) { this._call('SCV_saveDataLich', [a]); },
         SCV_getDataLich: function(a) { this._call('SCV_getDataLich', [a]); },
@@ -59,16 +58,14 @@ function createRunner(onSuccess, onFailure) {
         SCV_createNewFolder: function(a,b) { this._call('SCV_createNewFolder', [a,b]); },
         SCV_uploadMultipleFilesToDrive: function(a,b,c,d,e) { this._call('SCV_uploadMultipleFilesToDrive', [a,b,c,d,e]); },
         SCV_uploadFolderEvidence: function(a,b,c,d,e) { this._call('SCV_uploadFolderEvidence', [a,b,c,d,e]); },
-        // Lệnh dọn dẹp file Drive rác
         SCV_deleteFileByUrl: function(a) { this._call('SCV_deleteFileByUrl', [a]); },
-        // KẾT NỐI CHUYÊN TRÁCH GIAO TIẾP VỚI TRỢ LÝ AI
         SCV_chatWithDocument: function(a,b) { this._call('SCV_chatWithDocument', [a,b]); },
         SCV_extractLichFromDocument: function(a,b) { this._call('SCV_extractLichFromDocument', [a,b]); },
         SCV_extractCongVanFromDocument: function(a,b) { this._call('SCV_extractCongVanFromDocument', [a,b]); }
     };
 }
 
-// Bắt buộc tạo mới Runner mỗi khi gọi google.script.run để tránh nghẽn luồng
+// Giả lập đối tượng google.script.run để giữ nguyên mã nguồn cũ không bị lỗi
 const google = {
     script: {
         get run() {
