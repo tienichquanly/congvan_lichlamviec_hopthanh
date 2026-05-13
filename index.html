@@ -261,20 +261,22 @@
   let GLOBAL_PERM = false; 
 
   function applySystemConfig(config) {
-      if (!config) return;
-      
-      if (config.tenTruong) {
-          if(document.getElementById('header_ten_truong')) document.getElementById('header_ten_truong').innerText = config.tenTruong;
-          if(document.getElementById('login_ten_truong')) document.getElementById('login_ten_truong').innerText = config.tenTruong;
-          document.title = "Quản lý Công văn & Lịch - " + config.tenTruong;
-      }
+      // Đọc trực tiếp Tên trường và Logo từ file ketnoi.js
+      const tenTruong = typeof SCV_TEN_TRUONG !== 'undefined' ? SCV_TEN_TRUONG : 'ĐANG TẢI...';
+      const logo = typeof SCV_LINK_LOGO !== 'undefined' ? SCV_LINK_LOGO : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-      if (config.folderLich) window.SCV_FOLDER_LICH = config.folderLich;
-      if (config.folderCV) window.SCV_FOLDER_CV = config.folderCV;
-      if (config.logo) {
-          document.querySelectorAll('img[alt="Logo"]').forEach(img => img.src = config.logo);
-          const favicon = document.querySelector('link[rel="icon"]');
-          if(favicon) favicon.href = config.logo;
+      if(document.getElementById('header_ten_truong')) document.getElementById('header_ten_truong').innerText = tenTruong;
+      if(document.getElementById('login_ten_truong')) document.getElementById('login_ten_truong').innerText = tenTruong;
+      document.title = "Quản lý Công văn & Lịch - " + tenTruong;
+
+      document.querySelectorAll('img[alt="Logo"]').forEach(img => img.src = logo);
+      const favicon = document.querySelector('link[rel="icon"]');
+      if(favicon) favicon.href = logo;
+
+      // Nhận ID Folder (Dữ liệu) từ Máy chủ đẩy xuống (Thông qua config)
+      if (config) {
+          if (config.folderLich) window.SCV_FOLDER_LICH = config.folderLich;
+          if (config.folderCV) window.SCV_FOLDER_CV = config.folderCV;
       }
   }
 
@@ -284,6 +286,10 @@
 
   window.onload = function() {
     if (!checkTrialPeriod()) return;
+
+    // Áp dụng ngay lập tức cấu hình UI (Logo, Tên) từ ketnoi.js mà không chờ Server
+    applySystemConfig(null); 
+
     const storedId = sessionStorage.getItem("SCV_ACTIVE_ID");
     if(storedId) {
       window.SCV_GLOBAL_ID = storedId; 
@@ -295,11 +301,6 @@
       } else {
           checkPermissionAndLoad();
       }
-    } else {
-        // Gọi lên máy chủ để lấy tên trường hiển thị ở màn hình đăng nhập
-        if(typeof google !== 'undefined' && google.script) {
-            google.script.run.withSuccessHandler(res => { if(res && res.config) applySystemConfig(res.config); }).SCV_getInitialData("");
-        }
     }
   };
 
@@ -325,6 +326,7 @@
     }
     
     google.script.run.withSuccessHandler(res => {
+      // Cập nhật thêm ID Folder từ Server
       applySystemConfig(res.config); 
 
       if (res && res.canView) {
@@ -374,6 +376,7 @@
     google.script.run.withSuccessHandler(res => {
       document.getElementById('loading-overlay').style.display = 'none';
       
+      // Nhận cấu trúc Folder ID từ Server gửi xuống
       applySystemConfig(res.config); 
 
       GLOBAL_USER = res.sysId;
