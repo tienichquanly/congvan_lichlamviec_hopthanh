@@ -31,7 +31,7 @@ var SCV_GOOGLE_CLIENT_ID = "407480994586-m6fpq6sfcc90qqj9k08rsmi1lge6br94.apps.g
     
     var metaDesc = document.createElement('meta');
     metaDesc.name = "description";
-    metaDesc.content = "Hệ thống quản lý công văn và lịch công tác nội bộ - " + SCV_TEN_TRUONG + ".";
+    metaDesc.content = "Hệ thống " + SCV_TEN_PM.toLowerCase() + " nội bộ - " + SCV_TEN_TRUONG + ".";
     document.head.appendChild(metaDesc);
 
     var linkIcon = document.createElement('link');
