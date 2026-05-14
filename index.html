@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+  <link rel="icon" href="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
   <base target="_top">
-  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hệ thống quản lý công văn và lịch công tác nội bộ - Trường TH&THCS Hợp Thành.">
+  <title>Đang tải hệ thống...</title>
+
   <script>
     document.write('<script src="ketnoi.js?v=' + new Date().getTime() + '"><\/script>');
   </script>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
@@ -118,7 +121,7 @@
     <div id="app-version-text" style="font-size: 16px; color:#b91c1c; font-weight: bold; margin-bottom: 15px;"></div>
     
     <div id="g_id_onload" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-    <script>document.getElementById('g_id_onload').setAttribute('data-client_id', SCV_GOOGLE_CLIENT_ID);</script>
+    <script>document.getElementById('g_id_onload').setAttribute('data-client_id', typeof SCV_GOOGLE_CLIENT_ID !== 'undefined' ? SCV_GOOGLE_CLIENT_ID : '');</script>
     
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px;">
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
@@ -261,20 +264,22 @@
   let GLOBAL_PERM = false; 
 
   function applySystemConfig(config) {
-      // Đọc trực tiếp định danh từ file ketnoi.js
+      // Đọc trực tiếp Tên trường và Logo từ file ketnoi.js
       const tenTruong = typeof SCV_TEN_TRUONG !== 'undefined' ? SCV_TEN_TRUONG : 'ĐANG TẢI...';
-      const tenTruongUp = typeof SCV_TEN_TRUONG_UP !== 'undefined' ? SCV_TEN_TRUONG_UP : 'ĐANG TẢI...';
       const logo = typeof SCV_LINK_LOGO !== 'undefined' ? SCV_LINK_LOGO : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+      // CÁC BIẾN ĐỊNH DANH MỚI BÓC TÁCH
+      const tenPm = typeof SCV_TEN_PM !== 'undefined' ? SCV_TEN_PM : 'ĐANG TẢI...';
       const tenPmUp = typeof SCV_TEN_PM_UP !== 'undefined' ? SCV_TEN_PM_UP : 'ĐANG TẢI...';
       const phienBan = typeof SCV_PHIEN_BAN !== 'undefined' ? SCV_PHIEN_BAN : '';
-      const tacGiaUp = typeof SCV_TAC_GIA_UP !== 'undefined' ? SCV_TAC_GIA_UP : 'ĐANG TẢI...';
+      const tacGiaUp = typeof SCV_TAC_GIA_UP !== 'undefined' ? SCV_TAC_GIA_UP : '';
 
-      if(document.getElementById('header_ten_truong')) document.getElementById('header_ten_truong').innerText = tenTruongUp;
+      if(document.getElementById('header_ten_truong')) document.getElementById('header_ten_truong').innerText = tenTruong;
       if(document.getElementById('login_ten_truong')) document.getElementById('login_ten_truong').innerText = tenTruong;
-      
-      if(document.getElementById('login-title-main')) document.getElementById('login-title-main').innerText = tenPmUp;
+      document.title = (typeof SCV_TEN_PM !== 'undefined' ? SCV_TEN_PM : "Quản lý Công văn & Lịch") + " - " + tenTruong;
+
+      if(document.getElementById('login-title-main')) document.getElementById('login-title-main').innerText = tenPm;
       if(document.getElementById('header-title-main')) document.getElementById('header-title-main').innerText = tenPmUp;
-      
       if(document.getElementById('app-version-text')) document.getElementById('app-version-text').innerText = "Phiên bản AI: " + phienBan;
       if(document.getElementById('login-author-text')) document.getElementById('login-author-text').innerText = "Thiết kế và phát triển: " + tacGiaUp;
       if(document.getElementById('header-author-main')) document.getElementById('header-author-main').innerText = tacGiaUp;
