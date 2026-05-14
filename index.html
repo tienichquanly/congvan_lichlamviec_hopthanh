@@ -104,8 +104,8 @@
 <div id="login-overlay">
   <div class="login-box">
     <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="80" style="margin-bottom: 15px;" alt="Logo">
-    <h2 id="login-title-main" style="color: #b91c1c; margin-top: 0; text-transform: uppercase;"></h2>
-    <h3 id="login_ten_truong" style="color: #1e3a8a; margin-bottom: 25px;">Đang tải thông vị đơn vị...</h3>
+    <h2 id="login-title-main" style="color: #b91c1c; margin-top: 0; text-transform: uppercase;">ĐANG TẢI...</h2>
+    <h3 id="login_ten_truong" style="color: #1e3a8a; margin-bottom: 25px;">Đang tải thông tin đơn vị...</h3>
     
     <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #d1e7dd; border-radius: 8px; border: 1px solid #badbcc; text-align: left; color: #0f5132; line-height: 1.6; font-size: 15px;">
         <div style="display: flex; align-items: flex-start; gap: 8px;">
@@ -140,13 +140,13 @@
   <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Logo">
   <div class="header-text">
     <div class="school-name" id="header_ten_truong">ĐANG TẢI...</div>
-    <div class="app-title" id="header-title-main"></div>
+    <div class="app-title" id="header-title-main">ĐANG TẢI...</div>
   </div>
   <div class="dev-badge">
       <div class="dev-icon-box">💎</div>
       <div class="dev-text-box">
           <span class="dev-label-top">System Architect</span>
-          <span class="dev-name-main" id="header-author-main"></span>
+          <span class="dev-name-main" id="header-author-main">ĐANG TẢI...</span>
       </div>
   </div>
 </div>
@@ -285,13 +285,12 @@
 
       document.querySelectorAll('img[alt="Logo"]').forEach(img => {
           img.src = logo;
-          img.style.display = 'inline-block'; // Đảm bảo logo luôn hiển thị
+          img.style.display = 'inline-block'; 
       });
       
       const favicon = document.querySelector('link[rel="icon"]');
       if(favicon) favicon.href = logo;
 
-      // Nhận ID Folder (Dữ liệu) từ Máy chủ đẩy xuống (Thông qua config)
       if (config) {
           if (config.folderLich) window.SCV_FOLDER_LICH = config.folderLich;
           if (config.folderCV) window.SCV_FOLDER_CV = config.folderCV;
@@ -308,7 +307,6 @@
   window.onload = function() {
     if (!checkTrialPeriod()) return;
 
-    // Vẫn gọi lại phòng trường hợp mạng chậm tải ketnoi.js
     applySystemConfig(null); 
 
     const storedId = sessionStorage.getItem("SCV_ACTIVE_ID");
@@ -347,7 +345,6 @@
     }
     
     google.script.run.withSuccessHandler(res => {
-      // Cập nhật thêm ID Folder từ Server
       applySystemConfig(res.config); 
 
       if (res && res.canView) {
@@ -397,7 +394,6 @@
     google.script.run.withSuccessHandler(res => {
       document.getElementById('loading-overlay').style.display = 'none';
       
-      // Nhận cấu trúc Folder ID từ Server gửi xuống
       applySystemConfig(res.config); 
 
       GLOBAL_USER = res.sysId;
