@@ -5,7 +5,6 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Hệ thống quản lý công văn và lịch công tác nội bộ - Trường TH&THCS Hợp Thành.">
   <title>Đang tải hệ thống...</title>
 
   <script>
@@ -106,7 +105,7 @@
   <div class="login-box">
     <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="80" style="margin-bottom: 15px;" alt="Logo">
     <h2 id="login-title-main" style="color: #b91c1c; margin-top: 0; text-transform: uppercase;"></h2>
-    <h3 id="login_ten_truong" style="color: #1e3a8a; margin-bottom: 25px;">Đang tải thông tin đơn vị...</h3>
+    <h3 id="login_ten_truong" style="color: #1e3a8a; margin-bottom: 25px;">Đang tải thông vị đơn vị...</h3>
     
     <div style="margin-bottom: 25px; padding: 15px 20px; background-color: #d1e7dd; border-radius: 8px; border: 1px solid #badbcc; text-align: left; color: #0f5132; line-height: 1.6; font-size: 15px;">
         <div style="display: flex; align-items: flex-start; gap: 8px;">
@@ -284,7 +283,11 @@
       if(document.getElementById('login-author-text')) document.getElementById('login-author-text').innerText = "Thiết kế và phát triển: " + tacGiaUp;
       if(document.getElementById('header-author-main')) document.getElementById('header-author-main').innerText = tacGiaUp;
 
-      document.querySelectorAll('img[alt="Logo"]').forEach(img => img.src = logo);
+      document.querySelectorAll('img[alt="Logo"]').forEach(img => {
+          img.src = logo;
+          img.style.display = 'inline-block'; // Đảm bảo logo luôn hiển thị
+      });
+      
       const favicon = document.querySelector('link[rel="icon"]');
       if(favicon) favicon.href = logo;
 
@@ -295,6 +298,9 @@
       }
   }
 
+  // GỌI HÀM NÀY NGAY LẬP TỨC ĐỂ ĐẢM BẢO LOGO HIỂN THỊ TỨC THÌ, KHÔNG CHỜ TẢI TRANG
+  applySystemConfig(null);
+
   function checkTrialPeriod() {
      return true;
   }
@@ -302,7 +308,7 @@
   window.onload = function() {
     if (!checkTrialPeriod()) return;
 
-    // Áp dụng ngay lập tức cấu hình UI (Logo, Tên) từ ketnoi.js mà không chờ Server
+    // Vẫn gọi lại phòng trường hợp mạng chậm tải ketnoi.js
     applySystemConfig(null); 
 
     const storedId = sessionStorage.getItem("SCV_ACTIVE_ID");
