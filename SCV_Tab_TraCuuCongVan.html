@@ -2,193 +2,102 @@
   #tblSearchCV th, #tblSearchCV td { border: 1px solid #ccc !important; }
   #tblSearchCV th { white-space: nowrap; background-color: #1e3a8a; color: white; }
   .highlight-text { background-color: yellow; font-weight: bold; }
-  
-  /* Khung Chat Modal giao tiếp AI */
-  .ai-modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;
-  }
-  .ai-modal-content {
-      background: #fff; width: 90%; max-width: 600px; border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column;
-  }
-  .ai-modal-header {
-      background: #1e3a8a; color: white; padding: 15px; font-weight: bold;
-      display: flex; justify-content: space-between; align-items: center;
-  }
-  
-  /* Tối ưu hóa lăn bi chuột và thanh cuộn cho khung chat */
-  .ai-modal-body { 
-      padding: 15px; 
-      flex: 1; 
-      max-height: 60vh; 
-      overflow-y: auto; 
-      overscroll-behavior: contain; /* Ngăn cuộn trang nền khi lăn chuột ở đây */
-      scroll-behavior: smooth; 
-  }
-  .ai-modal-body::-webkit-scrollbar { width: 8px; }
-  .ai-modal-body::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-  .ai-modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-  .ai-modal-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
+  .ai-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+  .ai-modal-content { background: #fff; width: 90%; max-width: 600px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; }
+  .ai-modal-header { background: #1e3a8a; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+  .ai-modal-body { padding: 15px; flex: 1; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; scroll-behavior: smooth; }
+  .ai-modal-body::-webkit-scrollbar { width: 8px; } .ai-modal-body::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; } .ai-modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; } .ai-modal-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   .ai-modal-footer { padding: 15px; background: #f3f4f6; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
-  
-  .ai-response-box {
-      background: #e0f2fe; padding: 10px; border-radius: 5px; margin-bottom: 10px;
-      border-left: 4px solid #0284c7; font-size: 14px; color: #1e3a8a; min-height: 50px; 
-      white-space: normal;
-      line-height: 1.6;
-  }
-  
-  /* Đảm bảo ô nhập liệu cũng có thanh cuộn nếu văn bản quá dài */
-  #aiQueryInput {
-      overflow-y: auto;
-  }
-  #aiQueryInput::-webkit-scrollbar { width: 6px; }
-  #aiQueryInput::-webkit-scrollbar-track { background: transparent; }
-  #aiQueryInput::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-  /* Nút Copy kết quả AI */
-  .btn-copy {
-      background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;
-      padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;
-      margin-top: 10px; display: inline-block; font-weight: bold; transition: all 0.3s;
-  }
+  .ai-response-box { background: #e0f2fe; padding: 10px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #0284c7; font-size: 14px; color: #1e3a8a; min-height: 50px; white-space: normal; line-height: 1.6; }
+  #aiQueryInput { overflow-y: auto; } #aiQueryInput::-webkit-scrollbar { width: 6px; } #aiQueryInput::-webkit-scrollbar-track { background: transparent; } #aiQueryInput::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .btn-copy { background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 10px; display: inline-block; font-weight: bold; transition: all 0.3s; }
   .btn-copy:hover { background-color: #e2e8f0; color: #1e3a8a; border-color: #94a3b8; }
 </style>
 
 <div style="margin-bottom: 10px; overflow: hidden; display: flex; justify-content: space-between; align-items: center;">
-  <span id="status_search_cv" style="font-family:'Times New Roman'; font-style:italic; font-weight:bold; font-size:15px; color:#1e3a8a;">
-      👋 Mời chọn điều kiện để tìm kiếm...
-  </span>
+  <span id="status_search_cv" style="font-family:'Times New Roman'; font-style:italic; font-weight:bold; font-size:15px; color:#1e3a8a;">👋 Mời chọn điều kiện để tìm kiếm...</span>
 </div>
 
 <div class="cv-controls" style="flex-direction: row; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-start; padding: 10px; background:#e0f2fe; border:1px solid #bae6fd;">
     <select id="f_LoaiCQ" class="cv-combo" style="width: 130px;"><option value="">-- Loại CQ --</option></select>
     <select id="f_CoQuan" class="cv-combo" style="width: 130px;"><option value="">-- CQ Ban Hành --</option></select>
     <select id="f_LoaiVB" class="cv-combo" style="width: 130px;"><option value="">-- Loại VB --</option></select>
-    
     <input type="text" id="f_KyHieu" placeholder="Tìm Ký hiệu..." class="cv-combo" style="width:110px;" onkeydown="checkEnter(event)" autocomplete="off">
-
     <div style="display:flex; align-items:center; gap:5px; background:white; padding:3px; border-radius:4px; border:1px solid #ccc;">
        <span style="font-size:12px; font-weight:bold; color:#555;">Ngày:</span>
        <input type="text" id="f_TuNgay" placeholder="dd/mm/yyyy" style="width:80px; border:none; outline:none; text-align:center; font-size:13px;" oninput="formatDate(this)" onkeydown="checkEnter(event)" autocomplete="off">
        <span>-</span>
        <input type="text" id="f_DenNgay" placeholder="dd/mm/yyyy" style="width:80px; border:none; outline:none; text-align:center; font-size:13px;" oninput="formatDate(this)" onkeydown="checkEnter(event)" autocomplete="off">
     </div>
-
     <input type="text" id="f_TrichYeu" placeholder="🔍 Nhập nội dung trích yếu..." class="cv-combo" style="flex:1; min-width:250px; font-weight:bold;" onkeydown="checkEnter(event)" autocomplete="off">
-
-    <button onclick="loadDataSearchCV()" style="background:#1e3a8a; color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-weight:bold; white-space:nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-        🔍 Tìm kiếm
-    </button>
+    <button onclick="loadDataSearchCV()" style="background:#1e3a8a; color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-weight:bold; white-space:nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🔍 Tìm kiếm</button>
 </div>
 
 <div class="table-scroll">
     <table id="tblSearchCV" style="width: 100%; min-width: 1000px;">
-        <colgroup> 
-            <col id="colSuaCV" style="width: 50px;">
-            <col style="width: 50px;">  
-            <col style="width: 100px;"> 
-            <col style="width: 100px;"> 
-            <col>                       
-            <col style="width: 150px;"> 
-            <col style="width: 150px;">  
-            <col style="width: 100px;"> 
-        </colgroup>
+        <colgroup> <col id="colSuaCV" style="width: 50px;"> <col style="width: 50px;"> <col style="width: 100px;"> <col style="width: 100px;"> <col> <col style="width: 150px;"> <col style="width: 150px;"> <col style="width: 100px;"> </colgroup>
         <thead>
-            <tr> 
-                <th id="thSuaCV">Sửa</th>
-                <th>STT</th> 
-                <th>Ngày ban hành</th> 
-                <th>Ký hiệu</th> 
-                <th>Nội dung trích yếu văn bản</th> 
-                <th>Nơi nhận/Ban hành</th> 
-                <th>File đính kèm</th> 
-                <th>Ghi chú</th> 
-            </tr>
+            <tr> <th id="thSuaCV">Sửa</th> <th>STT</th> <th>Ngày ban hành</th> <th>Ký hiệu</th> <th>Nội dung trích yếu văn bản</th> <th>Nơi nhận/Ban hành</th> <th>File đính kèm</th> <th>Ghi chú</th> </tr>
         </thead>
-        <tbody id="bodySearchCV">
-            <tr><td colspan="8" class="text-center" style="padding:20px; color:#666;">⏳ Vui lòng nhập điều kiện và bấm Tìm kiếm...</td></tr>
-        </tbody>
+        <tbody id="bodySearchCV"><tr><td colspan="8" class="text-center" style="padding:20px; color:#666;">⏳ Vui lòng nhập điều kiện và bấm Tìm kiếm...</td></tr></tbody>
     </table>
 </div>
 
 <div id="aiChatModal" class="ai-modal-overlay">
     <div class="ai-modal-content">
-        <div class="ai-modal-header">
-            <span>🤖 Trợ lý AI Phân tích tài liệu</span>
-            <button onclick="closeChatModal()" style="background:transparent; border:none; color:white; font-size:16px; cursor:pointer;" title="Đóng">✖</button>
-        </div>
-        <div class="ai-modal-body">
-            <div id="aiResponseBox" class="ai-response-box">
-                <em>Xin chào! Hãy đặt câu hỏi về tài liệu, tôi sẽ đọc và tóm tắt thông tin giúp đồng chí.</em>
-            </div>
-            <input type="hidden" id="aiCurrentFileUrl">
-        </div>
-        <div class="ai-modal-footer">
-            <textarea id="aiQueryInput" placeholder="Ví dụ: Tóm tắt nội dung chính của văn bản này?" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; resize:none; height:40px; font-family:inherit;" onkeydown="checkEnterChat(event)"></textarea>
-            <button onclick="sendChatToAI()" id="btnSendAI" style="background:#1e3a8a; color:white; border:none; padding:0 20px; border-radius:4px; font-weight:bold; cursor:pointer;">Hỏi AI</button>
-        </div>
+        <div class="ai-modal-header"><span>🤖 Trợ lý AI Phân tích tài liệu</span><button onclick="closeChatModal()" style="background:transparent; border:none; color:white; font-size:16px; cursor:pointer;" title="Đóng">✖</button></div>
+        <div class="ai-modal-body"><div id="aiResponseBox" class="ai-response-box"><em>Xin chào! Hãy đặt câu hỏi về tài liệu, tôi sẽ đọc và tóm tắt thông tin giúp đồng chí.</em></div><input type="hidden" id="aiCurrentFileUrl"></div>
+        <div class="ai-modal-footer"><textarea id="aiQueryInput" placeholder="Ví dụ: Tóm tắt nội dung chính của văn bản này?" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; resize:none; height:40px; font-family:inherit;" onkeydown="checkEnterChat(event)"></textarea><button onclick="sendChatToAI()" id="btnSendAI" style="background:#1e3a8a; color:white; border:none; padding:0 20px; border-radius:4px; font-weight:bold; cursor:pointer;">Hỏi AI</button></div>
     </div>
 </div>
 
 <script>
     let IS_AUTH_CV = false; 
-    
-    // Khởi tạo bộ nhớ đệm toàn cục cho Trợ lý AI
     window.SCV_AI_CACHE = window.SCV_AI_CACHE || {};
 
     function initSearchCV() {
         if (typeof google === 'undefined' || !google.script) return;
-
         google.script.run
-            .withSuccessHandler(data => {
-                fillComboFilter('f_LoaiCQ', data.loaiCQ, '-- Loại CQ --');
-                fillComboFilter('f_CoQuan', data.coQuan, '-- CQ Ban Hành --');
-                fillComboFilter('f_LoaiVB', data.loaiVB, '-- Loại VB --');
-            })
+            .withSuccessHandler(data => { fillComboFilter('f_LoaiCQ', data.loaiCQ, '-- Loại CQ --'); fillComboFilter('f_CoQuan', data.coQuan, '-- CQ Ban Hành --'); fillComboFilter('f_LoaiVB', data.loaiVB, '-- Loại VB --'); })
             .withFailureHandler(err => toast("❌ Không tải được danh mục lọc: " + err))
             .SCV_getDmCongVan();
         
-        google.script.run
-            .withSuccessHandler(res => {
-                IS_AUTH_CV = res.canInput;
-                const st = document.getElementById('status_search_cv');
-                if(st) st.innerHTML = "👤 " + res.sysId; 
-
-                const disp = IS_AUTH_CV ? '' : 'none';
-                document.getElementById('colSuaCV').style.display = disp;
-                document.getElementById('thSuaCV').style.display = disp;
-            })
-            .withFailureHandler(err => console.error("Lỗi auth: ", err))
-            .SCV_getInitialData();
+        IS_AUTH_CV = GLOBAL_PERM;
+        const st = document.getElementById('status_search_cv'); if(st) st.innerHTML = "👤 " + GLOBAL_USER; 
+        const disp = IS_AUTH_CV ? '' : 'none';
+        document.getElementById('colSuaCV').style.display = disp;
+        document.getElementById('thSuaCV').style.display = disp;
     }
 
     function fillComboFilter(id, list, defaultText) {
-        const sel = document.getElementById(id);
-        sel.innerHTML = `<option value="">${defaultText}</option>`;
+        const sel = document.getElementById(id); sel.innerHTML = `<option value="">${defaultText}</option>`;
         if (list && list.length > 0) { list.forEach(item => { let opt = document.createElement('option'); opt.value = item; opt.innerText = item; sel.appendChild(opt); }); }
     }
 
     function checkEnter(e) { if (e.key === "Enter") { loadDataSearchCV(); } }
 
+    function parseDateToIntClient(val) {
+        if (!val) return 0;
+        let p = String(val).split('/');
+        if (p.length >= 3) return new Date(p[2], p[1]-1, p[0]).getTime();
+        return 0;
+    }
+
+    // --- LÕI TÌM KIẾM OFFLINE TRÊN BỘ NHỚ ĐỆM ---
     function loadDataSearchCV() {
         const tbody = document.getElementById('bodySearchCV');
         
-        // ĐÓNG GÓI CHUẨN JSON ĐỂ TRUYỀN LÊN SERVER
         const filtersObj = {
-            loaiCQ: document.getElementById('f_LoaiCQ').value,
-            coQuan: document.getElementById('f_CoQuan').value,
-            loaiVB: document.getElementById('f_LoaiVB').value,
-            kyHieu: document.getElementById('f_KyHieu').value.trim(),
+            loaiCQ: document.getElementById('f_LoaiCQ').value.toLowerCase(),
+            coQuan: document.getElementById('f_CoQuan').value.toLowerCase(),
+            loaiVB: document.getElementById('f_LoaiVB').value.toLowerCase(),
+            kyHieu: document.getElementById('f_KyHieu').value.trim().toLowerCase(),
             tuNgay: document.getElementById('f_TuNgay').value,
             denNgay: document.getElementById('f_DenNgay').value,
-            trichYeu: document.getElementById('f_TrichYeu').value.trim()
+            trichYeu: document.getElementById('f_TrichYeu').value.trim().toLowerCase()
         };
 
-        let isConditionEmpty = !filtersObj.loaiCQ && !filtersObj.coQuan && !filtersObj.loaiVB && 
-                               !filtersObj.kyHieu && !filtersObj.tuNgay && !filtersObj.denNgay && !filtersObj.trichYeu;
+        let isConditionEmpty = !filtersObj.loaiCQ && !filtersObj.coQuan && !filtersObj.loaiVB && !filtersObj.kyHieu && !filtersObj.tuNgay && !filtersObj.denNgay && !filtersObj.trichYeu;
 
         if (isConditionEmpty) {
             tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">⚠️ Vui lòng nhập ít nhất 1 điều kiện để tìm!</td></tr>';
@@ -196,47 +105,57 @@
         }
 
         const colSpanNum = IS_AUTH_CV ? 8 : 7;
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="${colSpanNum}" class="text-center" style="padding:30px; border: 1px solid #ccc !important;">
-                    <div class="spinner" style="width:30px; height:30px; border:4px solid #ccc; border-top:4px solid #1e3a8a; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div>
-                    <div style="margin-top:10px; color:#1e3a8a; font-weight:bold;">Đang quét và phân tích kho dữ liệu trên hệ thống...</div>
-                </td>
-            </tr>`;
+        tbody.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:30px; border: 1px solid #ccc !important;"><div class="spinner" style="width:30px; height:30px; border:4px solid #ccc; border-top:4px solid #1e3a8a; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto;"></div><div style="margin-top:10px; color:#1e3a8a; font-weight:bold;">Đang xử lý dữ liệu đệm...</div></td></tr>`;
             
-        google.script.run
-            .withSuccessHandler(response => {
-                if(response.error) {
-                     tbody.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">❌ Lỗi: ${response.error}</td></tr>`;
-                     return;
-                }
-                
-                const st = document.getElementById('status_search_cv');
-                if (st) {
-                    let text = `✅ Tìm thấy: <strong style="color:#e11d48;">${response.totalFound}</strong> văn bản.`;
-                    if (response.limitApplied) {
-                        text += ` <em>(Chỉ hiển thị 200 văn bản mới nhất để chống quá tải)</em>`;
-                    }
-                    st.innerHTML = text;
-                }
+        setTimeout(() => {
+            let fTu = 0; if (filtersObj.tuNgay) { let p = filtersObj.tuNgay.split('/'); if(p.length === 3) fTu = new Date(p[2], p[1]-1, p[0]).getTime(); }
+            let fDen = Number.MAX_SAFE_INTEGER; if (filtersObj.denNgay) { let p = filtersObj.denNgay.split('/'); if(p.length === 3) fDen = new Date(p[2], p[1]-1, p[0]).getTime(); }
 
-                renderTableCV(response.data); 
-            })
-            .withFailureHandler(err => {
-                tbody.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">❌ Lỗi kết nối máy chủ: ${err}</td></tr>`;
-            })
-            .SCV_getDataCongVan(filtersObj);
+            let matched = window.SCV_CACHE_CONGVAN.filter(r => {
+                if(filtersObj.loaiCQ && String(r.loaiCQ).toLowerCase() !== filtersObj.loaiCQ) return false;
+                if(filtersObj.coQuan && String(r.coQuan).toLowerCase() !== filtersObj.coQuan) return false;
+                if(filtersObj.loaiVB && String(r.loaiVB).toLowerCase() !== filtersObj.loaiVB) return false;
+                if(filtersObj.kyHieu && !String(r.kyHieu).toLowerCase().includes(filtersObj.kyHieu)) return false;
+
+                let dItem = parseDateToIntClient(r.ngayBH);
+                if(fTu > 0 && dItem < fTu) return false;
+                if(fDen < Number.MAX_SAFE_INTEGER && dItem > fDen) return false;
+
+                if(filtersObj.trichYeu) {
+                    let content = (String(r.trichYeu) + " " + String(r.kyHieu) + " " + String(r.ghiChu)).toLowerCase();
+                    if (!content.includes(filtersObj.trichYeu)) return false;
+                }
+                return true;
+            });
+
+            matched.sort((a, b) => parseDateToIntClient(b.ngayBH) - parseDateToIntClient(a.ngayBH));
+            
+            const limitApplied = matched.length > 200;
+            const finalData = matched.slice(0, 200);
+            
+            const st = document.getElementById('status_search_cv');
+            if (st) {
+                let text = `✅ Tìm thấy: <strong style="color:#e11d48;">${matched.length}</strong> văn bản.`;
+                if (limitApplied) text += ` <em>(Chỉ hiển thị 200 VB mới nhất)</em>`;
+                st.innerHTML = text;
+            }
+            renderTableCV(finalData);
+        }, 10);
     }
 
+    // --- VẼ BẢNG BẰNG STRING BUILDER ---
     function renderTableCV(data) {
         const tb = document.getElementById('bodySearchCV');
-        tb.innerHTML = "";
         const colSpanNum = IS_AUTH_CV ? 8 : 7;
         
         if(!data || data.length === 0) { 
             tb.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; border: 1px solid #ccc !important;">❌ Không tìm thấy văn bản phù hợp!</td></tr>`;
             return; 
         }
+
+        let htmlStr = "";
+        const center = 'text-align: center; vertical-align:middle; padding:6px; border: 1px solid #ccc !important;';
+        const left = 'text-align: left !important; vertical-align:middle; padding:6px 10px; border: 1px solid #ccc !important;';
 
         data.forEach((r, i) => {
             let linkHtml = "";
@@ -248,22 +167,14 @@
                                  <a href="${url}" target="_blank" style="text-decoration:none; background:#e0f2fe; border:1px solid #bae6fd; padding:3px 6px; border-radius:3px; font-size:12px; font-weight:bold; color:#0369a1;" title="Xem tài liệu ${idx+1}">📎 Xem</a>
                                  <button onclick="openChatModal('${url}')" style="background:#fef08a; border:1px solid #fde047; padding:3px 6px; border-radius:3px; font-size:12px; font-weight:bold; color:#854d0e; cursor:pointer;" title="Hỏi Trợ lý AI về văn bản này">🤖 Hỏi AI</button>
                               </div>
-                           `).join('') +
-                           `</div>`;
+                           `).join('') + `</div>`;
             }
             
-            const center = 'text-align: center; vertical-align:middle; padding:6px; border: 1px solid #ccc !important;';
-            const left = 'text-align: left !important; vertical-align:middle; padding:6px 10px; border: 1px solid #ccc !important;';
             const rowDataString = encodeURIComponent(JSON.stringify(r));
-
             let htmlSua = "";
-            if (IS_AUTH_CV) {
-                htmlSua = `<td style="${center}">
-                    <button onclick="transferToEditCongVan(this, '${rowDataString}')" style="border:1px solid #94a3b8; background:#fff; cursor:pointer; padding:3px 8px; border-radius:4px; color:#1e3a8a; font-weight:bold;" title="Sửa">📝</button>
-                </td>`;
-            }
+            if (IS_AUTH_CV) { htmlSua = `<td style="${center}"><button onclick="transferToEditCongVan(this, '${rowDataString}')" style="border:1px solid #94a3b8; background:#fff; cursor:pointer; padding:3px 8px; border-radius:4px; color:#1e3a8a; font-weight:bold;" title="Sửa">📝</button></td>`; }
 
-            tb.innerHTML += `
+            htmlStr += `
             <tr style="background-color:${i%2===0?'white':'#f9fafb'}; border-bottom:1px solid #eee;">
                 ${htmlSua} <td style="${center}">${i + 1}</td>
                 <td style="${center}">${r.ngayBH}</td>
@@ -274,6 +185,7 @@
                 <td style="${center} font-size:13px; color:#666;">${r.ghiChu}</td>
             </tr>`;
         });
+        tb.innerHTML = htmlStr;
     }
 
     function transferToEditCongVan(btn, dataEncoded) {
@@ -281,25 +193,10 @@
              const rowData = JSON.parse(decodeURIComponent(dataEncoded));
              if(typeof fillFormCongVan === 'function') {
                  fillFormCongVan(rowData);
-                 const tr = btn.closest('tr');
-                 tr.style.backgroundColor = '#fef9c3'; 
-                 tr.style.transition = 'opacity 0.5s'; 
-                 tr.style.opacity = '0';
-                 setTimeout(() => tr.remove(), 500);
+                 const tr = btn.closest('tr'); tr.style.backgroundColor = '#fef9c3'; tr.style.transition = 'opacity 0.5s'; tr.style.opacity = '0'; setTimeout(() => tr.remove(), 500);
                  if(typeof toast === 'function') toast("✅ Đã chuyển dữ liệu sang tab [NHẬP CÔNG VĂN].");
-             } else {
-                 if(typeof toast === 'function') toast("❌ Lỗi: Không tìm thấy hàm điền dữ liệu.");
-             }
-         } catch(e) { console.error(e); if(typeof toast === 'function') toast("❌ Lỗi đọc dữ liệu!"); }
-    }
-
-    function parseDateCV(str) { 
-        if(!str) return 0; 
-        try { 
-            const p = str.split('/'); 
-            if(p.length < 3) return 0;
-            return new Date(p[2], p[1]-1, p[0]).getTime(); 
-        } catch(e) { return 0; } 
+             } else { if(typeof toast === 'function') toast("❌ Lỗi: Không tìm thấy hàm điền dữ liệu."); }
+         } catch(e) { if(typeof toast === 'function') toast("❌ Lỗi đọc dữ liệu!"); }
     }
     
     function formatDate(elm) { 
@@ -312,152 +209,36 @@
         elm.value = o; 
     }
 
-    // ==========================================
-    // CÁC HÀM XỬ LÝ GIAO TIẾP VỚI TRỢ LÝ AI
-    // ==========================================
-    
-    function checkEnterChat(e) {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault(); 
-            sendChatToAI();
-        }
-    }
-
-    function openChatModal(fileUrl) {
-        document.getElementById('aiChatModal').style.display = 'flex';
-        document.getElementById('aiCurrentFileUrl').value = fileUrl;
-        document.getElementById('aiResponseBox').innerHTML = '<em>Xin chào! Hãy đặt câu hỏi về tài liệu (Ví dụ: Tóm tắt ý chính? Ai là người ký? Hạn nộp là bao giờ?), tôi sẽ đọc và phản hồi giúp đồng chí.</em>';
-        document.getElementById('aiQueryInput').value = '';
-    }
-
-    function closeChatModal() {
-        document.getElementById('aiChatModal').style.display = 'none';
-    }
-
-    // Bộ lọc nội dung AI tối giản (Chỉ in đậm và xuống dòng)
-    function formatAIResponse(text) {
-        if (!text) return "";
-        let html = text;
-        
-        // 1. Chuyển đổi **nội dung** thành thẻ in đậm
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        // 2. Xóa bỏ khoảng trắng thừa mứa
-        html = html.replace(/\n{3,}/g, '\n\n');
-        
-        // 3. Đổi dấu xuống dòng thành thẻ <br> chuẩn của HTML
-        html = html.replace(/\n/g, '<br>');
-        
-        return html;
-    }
-
-    // Hàm copy nội dung phản hồi của AI
-    function copyToClipboard(button, elementId) {
-        const contentElement = document.getElementById(elementId);
-        if (!contentElement) return;
-
-        // Trích xuất văn bản thuần tuý (bỏ các thẻ HTML) để khi dán ra Word/Zalo được sạch đẹp
-        let textToCopy = contentElement.innerText || contentElement.textContent;
-
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            const originalText = button.innerHTML;
-            button.innerHTML = "✅ Đã copy!";
-            button.style.backgroundColor = "#dcfce3";
-            button.style.color = "#166534";
-            button.style.borderColor = "#86efac";
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.backgroundColor = "#f1f5f9";
-                button.style.color = "#475569";
-                button.style.borderColor = "#cbd5e1";
-            }, 2000);
-        }).catch(err => {
-            console.error("Lỗi sao chép: ", err);
-        });
-    }
-
-    // Tích hợp Bộ nhớ đệm và Hiển thị Tức thì (Đã BỎ Typewriter)
+    // [GIỮ NGUYÊN CÁC HÀM GIAO TIẾP TRỢ LÝ AI (checkEnterChat, openChatModal, closeChatModal, formatAIResponse, copyToClipboard, sendChatToAI) TỪ BẢN GỐC]
+    function checkEnterChat(e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatToAI(); } }
+    function openChatModal(fileUrl) { document.getElementById('aiChatModal').style.display = 'flex'; document.getElementById('aiCurrentFileUrl').value = fileUrl; document.getElementById('aiResponseBox').innerHTML = '<em>Xin chào! Hãy đặt câu hỏi về tài liệu, tôi sẽ đọc và phản hồi giúp đồng chí.</em>'; document.getElementById('aiQueryInput').value = ''; }
+    function closeChatModal() { document.getElementById('aiChatModal').style.display = 'none'; }
+    function formatAIResponse(text) { if (!text) return ""; let html = text; html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); html = html.replace(/\n{3,}/g, '\n\n'); html = html.replace(/\n/g, '<br>'); return html; }
+    function copyToClipboard(button, elementId) { const contentElement = document.getElementById(elementId); if (!contentElement) return; let textToCopy = contentElement.innerText || contentElement.textContent; navigator.clipboard.writeText(textToCopy).then(() => { const originalText = button.innerHTML; button.innerHTML = "✅ Đã copy!"; button.style.backgroundColor = "#dcfce3"; button.style.color = "#166534"; button.style.borderColor = "#86efac"; setTimeout(() => { button.innerHTML = originalText; button.style.backgroundColor = "#f1f5f9"; button.style.color = "#475569"; button.style.borderColor = "#cbd5e1"; }, 2000); }).catch(err => { console.error("Lỗi sao chép: ", err); }); }
     function sendChatToAI() {
-        const queryInput = document.getElementById('aiQueryInput');
-        const query = queryInput.value.trim();
-        const fileUrl = document.getElementById('aiCurrentFileUrl').value;
-        const resBox = document.getElementById('aiResponseBox');
-        const btnSend = document.getElementById('btnSendAI');
-        const modalBody = document.querySelector('.ai-modal-body');
-
-        if(!query) {
-            alert("Vui lòng nhập câu hỏi!"); return;
-        }
-
-        // LÀM SẠCH KHUNG NHẬP LIỆU NGAY LẬP TỨC ĐỂ TRÁNH NGƯỜI DÙNG BẤM GỬI NHIỀU LẦN
-        queryInput.value = '';
-
-        btnSend.disabled = true;
-        btnSend.innerHTML = "⏳ Đang phân tích...";
-
-        if (resBox.innerHTML.includes('<em>Xin chào!')) {
-            resBox.innerHTML = '';
-        }
-
+        const queryInput = document.getElementById('aiQueryInput'); const query = queryInput.value.trim(); const fileUrl = document.getElementById('aiCurrentFileUrl').value; const resBox = document.getElementById('aiResponseBox'); const btnSend = document.getElementById('btnSendAI'); const modalBody = document.querySelector('.ai-modal-body');
+        if(!query) { alert("Vui lòng nhập câu hỏi!"); return; }
+        queryInput.value = ''; btnSend.disabled = true; btnSend.innerHTML = "⏳ Đang phân tích...";
+        if (resBox.innerHTML.includes('<em>Xin chào!')) { resBox.innerHTML = ''; }
         const messageId = "ai_msg_" + new Date().getTime();
         const newChatBlock = `<div style="margin-top: 10px; border-top: 1px dashed #bae6fd; padding-top: 10px;"><strong>👤 Bạn:</strong> ${query}</div><div id="${messageId}" style="margin-top: 8px; padding: 8px; background: #f0f9ff; border-radius: 4px;"><span style="color:#666; font-style: italic;">⏳ AI đang đọc và phân tích tài liệu, xin vui lòng chờ giây lát...</span></div>`;
         resBox.innerHTML += newChatBlock;
-
         if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
 
-        // XỬ LÝ BỘ NHỚ ĐỆM (CACHE)
         const cacheKey = fileUrl + "_" + query.toLowerCase();
         if (window.SCV_AI_CACHE[cacheKey]) {
-            btnSend.disabled = false;
-            btnSend.innerHTML = "Hỏi AI";
-            
-            // In thẳng kết quả ra màn hình ngay lập tức (Không chờ gõ phím) và gắn nút Copy
+            btnSend.disabled = false; btnSend.innerHTML = "Hỏi AI";
             const targetBox = document.getElementById(messageId);
-            if(targetBox) {
-                targetBox.style.background = 'transparent';
-                targetBox.style.padding = '0';
-                targetBox.innerHTML = `<strong>🤖 AI trả lời:</strong><br><div id="text_${messageId}">${window.SCV_AI_CACHE[cacheKey]}</div>
-                                       <button class="btn-copy" onclick="copyToClipboard(this, 'text_${messageId}')">📋 Copy kết quả</button>`;
-            }
-            if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
-            return;
+            if(targetBox) { targetBox.style.background = 'transparent'; targetBox.style.padding = '0'; targetBox.innerHTML = `<strong>🤖 AI trả lời:</strong><br><div id="text_${messageId}">${window.SCV_AI_CACHE[cacheKey]}</div><button class="btn-copy" onclick="copyToClipboard(this, 'text_${messageId}')">📋 Copy kết quả</button>`; }
+            if (modalBody) modalBody.scrollTop = modalBody.scrollHeight; return;
         }
 
-        google.script.run
-            .withSuccessHandler(res => {
-                btnSend.disabled = false;
-                btnSend.innerHTML = "Hỏi AI";
-                
-                const targetBox = document.getElementById(messageId);
-                
-                if(res.success) {
-                    const formattedResponse = formatAIResponse(res.message);
-                    
-                    // Lưu kết quả vào Cache để dùng lại
-                    window.SCV_AI_CACHE[cacheKey] = formattedResponse;
-                    
-                    if(targetBox) {
-                        // In thẳng kết quả ra màn hình ngay lập tức và gắn nút Copy
-                        targetBox.style.background = 'transparent';
-                        targetBox.style.padding = '0';
-                        targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br><div id="text_${messageId}">${formattedResponse}</div>
-                                               <button class="btn-copy" onclick="copyToClipboard(this, 'text_${messageId}')">📋 Copy kết quả</button>`;
-                    }
-                } else {
-                    if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</span>`;
-                }
-                
+        google.script.run.withSuccessHandler(res => {
+                btnSend.disabled = false; btnSend.innerHTML = "Hỏi AI"; const targetBox = document.getElementById(messageId);
+                if(res.success) { const formattedResponse = formatAIResponse(res.message); window.SCV_AI_CACHE[cacheKey] = formattedResponse; if(targetBox) { targetBox.style.background = 'transparent'; targetBox.style.padding = '0'; targetBox.innerHTML = `<strong>🤖 AI Phản hồi:</strong><br><div id="text_${messageId}">${formattedResponse}</div><button class="btn-copy" onclick="copyToClipboard(this, 'text_${messageId}')">📋 Copy kết quả</button>`; } } else { if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>⚠️ Lỗi:</strong> ${res.message}</span>`; }
                 if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
-            })
-            .withFailureHandler(err => {
-                btnSend.disabled = false;
-                btnSend.innerHTML = "Hỏi AI";
-                
-                const targetBox = document.getElementById(messageId);
-                if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>❌ Lỗi kết nối máy chủ:</strong> ${err}</span>`;
-                
-                if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
-            })
-            .SCV_chatWithDocument(fileUrl, query);
+            }).withFailureHandler(err => {
+                btnSend.disabled = false; btnSend.innerHTML = "Hỏi AI"; const targetBox = document.getElementById(messageId); if(targetBox) targetBox.innerHTML = `<span style="color:red;"><strong>❌ Lỗi kết nối máy chủ:</strong> ${err}</span>`; if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
+            }).SCV_chatWithDocument(fileUrl, query);
     }
 </script>
