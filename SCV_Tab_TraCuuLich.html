@@ -4,9 +4,7 @@
 </style>
 
 <div style="margin-bottom: 10px; overflow: hidden; display: flex; justify-content: space-between; align-items: center;">
-  <span id="status_search_lich" style="font-family:'Times New Roman'; font-style:italic; font-weight:bold; font-size:15px; color:#1e3a8a;">
-      👋 Mời chọn khoảng thời gian để xem lịch...
-  </span>
+  <span id="status_search_lich" style="font-family:'Times New Roman'; font-style:italic; font-weight:bold; font-size:15px; color:#1e3a8a;">👋 Mời chọn khoảng thời gian để xem lịch...</span>
 </div>
 
 <div style="background:#e0f2fe; padding:10px; border:1px solid #bae6fd; margin-bottom:10px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
@@ -16,40 +14,24 @@
       <span style="font-family:'Times New Roman'; font-size:16px; font-weight:bold;">Đến:</span>
       <input type="text" id="dTo" placeholder="dd/mm/yyyy" maxlength="10" oninput="formatDate(this)" onkeydown="checkEnterLich(event)" style="font-family:'Times New Roman'; font-size:16px; border:none; outline:none; padding:4px; width:90px; text-align:center;">
   </div>
-  
   <input type="text" id="f_ContentLich" placeholder="🔍 Tìm nội dung, chủ trì, địa điểm..." style="flex:1; min-width:200px; padding:6px; font-family:'Times New Roman'; font-size:15px; border:1px solid #ccc; border-radius:4px;" onkeydown="checkEnterLich(event)">
-  
   <input type="text" id="f_ThanhPhan" placeholder="👤 Tổng hợp theo tên..." style="flex:1; min-width:160px; padding:6px; font-family:'Times New Roman'; font-size:15px; border:1px solid #1e3a8a; border-radius:4px; background:#f8fafc;" onkeydown="checkEnterLich(event)">
-  
   <span id="stat_SoBuoi" style="font-family:'Times New Roman'; font-size:15px; font-weight:bold; color:#b91c1c; white-space:nowrap; padding: 0 5px;">Thống kê: 0 buổi</span>
-  
-  <button onclick="loadDataServer()" style="background:#1e3a8a; color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-family:'Times New Roman'; font-size:15px; font-weight:bold; white-space:nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-      🔍 Xem Lịch
-  </button>
+  <button onclick="loadDataServer()" style="background:#1e3a8a; color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-family:'Times New Roman'; font-size:15px; font-weight:bold; white-space:nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🔍 Xem Lịch</button>
 </div>
 
 <div class="table-scroll">
   <table id="tblView" style="table-layout: fixed; width: 100%; min-width: 1000px;">
     <colgroup> 
-        <col id="colSuaLich" style="width: 50px; display: none;"> 
-        <col style="width: 50px;"> 
-        <col style="width: 110px;"> 
-        <col style="width: 70px;"> 
-        <col> 
-        <col style="width: 200px;"> 
-        <col style="width: 200px;"> 
-        <col style="width: 150px;"> 
-        <col style="width: 110px;"> 
+        <col id="colSuaLich" style="width: 50px; display: none;"> <col style="width: 50px;"> <col style="width: 110px;"> <col style="width: 70px;"> 
+        <col> <col style="width: 200px;"> <col style="width: 200px;"> <col style="width: 150px;"> <col style="width: 110px;"> 
     </colgroup>
     <thead>
       <tr>
-        <th id="thSuaLich" style="display: none;">Sửa</th> 
-        <th>STT</th> <th>Thời gian<br>(dd/mm/yyyy)</th> <th>Giờ</th> <th>Nội dung công việc</th> <th>Chủ trì</th> <th>Địa điểm</th> <th>Thành phần</th> <th>File đính kèm</th>
+        <th id="thSuaLich" style="display: none;">Sửa</th> <th>STT</th> <th>Thời gian<br>(dd/mm/yyyy)</th> <th>Giờ</th> <th>Nội dung công việc</th> <th>Chủ trì</th> <th>Địa điểm</th> <th>Thành phần</th> <th>File đính kèm</th>
       </tr>
     </thead>
-    <tbody id="bodyView">
-        <tr><td colspan="9" class="text-center" style="padding:20px; color:#666; border: 1px solid #ccc !important;">⏳ Vui lòng chọn thời gian và bấm Xem Lịch...</td></tr>
-    </tbody>
+    <tbody id="bodyView"><tr><td colspan="9" class="text-center" style="padding:20px; color:#666; border: 1px solid #ccc !important;">⏳ Vui lòng chọn thời gian và bấm Xem Lịch...</td></tr></tbody>
   </table>
 </div>
 
@@ -58,104 +40,109 @@
 
   function initTabLich() {
       setDefaultDates();
-      if (typeof google === 'undefined' || !google.script) return;
-      
-      google.script.run.withSuccessHandler(res => {
-          IS_AUTH_LICH = res.canInput; 
-          const userName = res.sysId; 
-          const st = document.getElementById('status_search_lich');
-          if(st) st.innerHTML = "👤 " + userName;
- 
-          const disp = IS_AUTH_LICH ? '' : 'none';
-          if (document.getElementById('colSuaLich')) document.getElementById('colSuaLich').style.display = disp;
-          if (document.getElementById('thSuaLich')) document.getElementById('thSuaLich').style.display = disp;
-      }).SCV_getInitialData();
+      IS_AUTH_LICH = GLOBAL_PERM;
+      const st = document.getElementById('status_search_lich'); if(st) st.innerHTML = "👤 " + GLOBAL_USER;
+      const disp = IS_AUTH_LICH ? '' : 'none';
+      if (document.getElementById('colSuaLich')) document.getElementById('colSuaLich').style.display = disp;
+      if (document.getElementById('thSuaLich')) document.getElementById('thSuaLich').style.display = disp;
   }
 
   function setDefaultDates() {
       const now = new Date();
-      const ddTo = ("0" + now.getDate()).slice(-2);
-      const mmTo = ("0" + (now.getMonth() + 1)).slice(-2);
-      const yyyyTo = now.getFullYear();
-      
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      const ddEnd = ("0" + lastDay.getDate()).slice(-2);
-
+      const ddTo = ("0" + now.getDate()).slice(-2); const mmTo = ("0" + (now.getMonth() + 1)).slice(-2); const yyyyTo = now.getFullYear();
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0); const ddEnd = ("0" + lastDay.getDate()).slice(-2);
       if(!document.getElementById('dTo').value) document.getElementById('dTo').value = `${ddEnd}/${mmTo}/${yyyyTo}`;
       if(!document.getElementById('dFrom').value) document.getElementById('dFrom').value = `01/${mmTo}/${yyyyTo}`;
   }
 
-  function checkEnterLich(e) {
-      if (e.key === "Enter") loadDataServer();
+  function checkEnterLich(e) { if (e.key === "Enter") loadDataServer(); }
+
+  // HÀM HỖ TRỢ XỬ LÝ SỐ HÓA NGÀY THÁNG ĐỂ LỌC VÀ SẮP XẾP NHANH
+  function parseDateTimeClient(dStr, tStr) {
+      if(!dStr) return 0;
+      try {
+          const d = String(dStr).split('/');
+          if(d.length < 3) return 0;
+          let h = 0, m = 0;
+          if(tStr && String(tStr).includes(':')) {
+              const t = String(tStr).split(':'); h = parseInt(t[0]) || 0; m = parseInt(t[1]) || 0;
+          } else if (tStr && !isNaN(tStr)) { h = parseInt(tStr) || 0; }
+          return new Date(d[2], d[1]-1, d[0], h, m).getTime();
+      } catch(e) { return 0; }
   }
 
+  // --- LÕI TÌM KIẾM OFFLINE TRÊN BỘ NHỚ ĐỆM ---
   function loadDataServer() {
       const tbody = document.getElementById('bodyView');
+      const fTuStr = document.getElementById('dFrom').value;
+      const fDenStr = document.getElementById('dTo').value;
+      const fTxt = document.getElementById('f_ContentLich').value.trim().toLowerCase();
+      const fName = document.getElementById('f_ThanhPhan').value.trim().toLowerCase();
       
-      // ĐÓNG GÓI CHUẨN JSON ĐỂ GỬI LÊN MÁY CHỦ LỌC
-      const filtersObj = {
-          tuNgay: document.getElementById('dFrom').value,
-          denNgay: document.getElementById('dTo').value,
-          noiDung: document.getElementById('f_ContentLich').value.trim(),
-          thanhPhan: document.getElementById('f_ThanhPhan').value.trim()
-      };
-      
-      if (!filtersObj.tuNgay && !filtersObj.denNgay && !filtersObj.noiDung && !filtersObj.thanhPhan) {
+      const fTu = parseDateTimeClient(fTuStr, "00:00");
+      const fDen = fDenStr ? parseDateTimeClient(fDenStr, "23:59") : Number.MAX_SAFE_INTEGER;
+      const contentWords = fTxt ? fTxt.split(/\s+/) : [];
+
+      if (!fTuStr && !fDenStr && !fTxt && !fName) {
           tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">⚠️ Vui lòng chọn ít nhất 1 điều kiện!</td></tr>';
           return;
       }
       
-      const colSpanNum = 9;
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="padding:30px; border: 1px solid #ccc !important;"><div style="display:inline-block; width:30px; height:30px; border:4px solid #ccc; border-top:4px solid #1e3a8a; border-radius:50%; animation:spin 1s linear infinite;"></div><div style="margin-top:10px; color:#1e3a8a; font-weight:bold;">Đang xử lý dữ liệu đệm...</div></td></tr>`;
 
-      tbody.innerHTML = `
-          <tr>
-              <td colspan="${colSpanNum}" class="text-center" style="padding:30px; border: 1px solid #ccc !important;">
-                  <div style="display:inline-block; width:30px; height:30px; border:4px solid #ccc; border-top:4px solid #1e3a8a; border-radius:50%; animation:spin 1s linear infinite;"></div>
-                  <div style="margin-top:10px; color:#1e3a8a; font-weight:bold;">Đang quét kho dữ liệu lịch trên hệ thống...</div>
-              </td>
-          </tr>`;
+      setTimeout(() => {
+          let matched = window.SCV_CACHE_LICH.filter(r => {
+              let timeVal = parseDateTimeClient(r[0], r[1] || "00:00");
+              if (fTu > 0 && timeVal < fTu) return false;
+              if (fDenStr && timeVal > fDen) return false;
+
+              if (contentWords.length > 0) {
+                  let content = (r[2] + " " + r[3] + " " + r[4] + " " + r[5]).toLowerCase();
+                  for (let w of contentWords) { if (!content.includes(w)) return false; }
+              }
+
+              if (fName) { let thanhPhan = String(r[5] || "").toLowerCase(); if (!thanhPhan.includes(fName)) return false; }
+              return true;
+          });
+
+          // Sắp xếp giảm dần
+          matched.sort((a, b) => parseDateTimeClient(b[0], b[1]) - parseDateTimeClient(a[0], a[1]));
+
+          const limitApplied = matched.length > 200;
+          const finalData = matched.slice(0, 200);
+
+          const statEl = document.getElementById('stat_SoBuoi');
+          if(statEl) statEl.innerHTML = `Thống kê: ${matched.length} buổi`;
+
+          const st = document.getElementById('status_search_lich');
+          if (st) {
+              let text = `✅ Tìm thấy: <strong style="color:#e11d48;">${matched.length}</strong> lịch.`;
+              if (limitApplied) text += ` <em>(Chỉ hiển thị 200 lịch mới nhất để chống quá tải)</em>`;
+              st.innerHTML = text;
+          }
           
-      google.script.run
-        .withSuccessHandler(response => {
-            if(response.error) {
-                tbody.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">❌ Lỗi: ${response.error}</td></tr>`;
-                return;
-            }
-
-            const statEl = document.getElementById('stat_SoBuoi');
-            if(statEl) statEl.innerHTML = `Thống kê: ${response.totalFound} buổi`;
-
-            const st = document.getElementById('status_search_lich');
-            if (st) {
-                let text = `✅ Tìm thấy: <strong style="color:#e11d48;">${response.totalFound}</strong> lịch công tác.`;
-                if (response.limitApplied) {
-                    text += ` <em>(Chỉ hiển thị 200 lịch mới nhất để chống quá tải)</em>`;
-                }
-                st.innerHTML = text;
-            }
-            
-            renderTable(response.data); 
-        })
-        .withFailureHandler(err => {
-            tbody.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; font-weight:bold; border: 1px solid #ccc !important;">❌ Lỗi kết nối máy chủ: ${err}</td></tr>`;
-        })
-        .SCV_getDataLich(filtersObj);
+          renderTable(finalData);
+      }, 10);
   }
 
+  // --- VẼ BẢNG 1 LẦN BẰNG STRING BUILDER ---
   function renderTable(data) {
     const disp = IS_AUTH_LICH ? '' : 'none';
     if (document.getElementById('colSuaLich')) document.getElementById('colSuaLich').style.display = disp;
     if (document.getElementById('thSuaLich')) document.getElementById('thSuaLich').style.display = disp;
 
     const tb = document.getElementById('bodyView'); 
-    tb.innerHTML = "";
-    const colSpanNum = 9;
     
     if(!data || data.length === 0) { 
-        tb.innerHTML = `<tr><td colspan="${colSpanNum}" class="text-center" style="padding:20px; color:red; border: 1px solid #ccc !important;">❌ Không tìm thấy lịch nào phù hợp!</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="9" class="text-center" style="padding:20px; color:red; border: 1px solid #ccc !important;">❌ Không tìm thấy lịch nào phù hợp!</td></tr>`;
         return; 
     }
     
+    let htmlStr = "";
+    const centerStyle = 'text-align: center; vertical-align: middle; padding: 8px; word-wrap: break-word; border: 1px solid #ccc !important;';
+    const leftStyle   = 'text-align: left !important; vertical-align: middle; padding: 8px; padding-left: 8px; word-wrap: break-word; white-space: pre-wrap; border: 1px solid #ccc !important;';
+    let styleSua = IS_AUTH_LICH ? centerStyle : 'display: none;';
+
     data.forEach((r, i) => {
        let cellVal = r[6], urlShow = "";
        if (typeof cellVal === 'object' && cellVal !== null) { urlShow = cellVal.url || ""; } 
@@ -169,18 +156,12 @@
                       `</div>`;
        }
        
-       const centerStyle = 'text-align: center; vertical-align: middle; padding: 8px; word-wrap: break-word; border: 1px solid #ccc !important;';
-       const leftStyle   = 'text-align: left !important; vertical-align: middle; padding: 8px; padding-left: 8px; word-wrap: break-word; white-space: pre-wrap; border: 1px solid #ccc !important;';
-       
        const rowDataString = encodeURIComponent(JSON.stringify(r)).replace(/'/g, "%27");
-       
-       let styleSua = IS_AUTH_LICH ? centerStyle : 'display: none;';
        let btnSua = IS_AUTH_LICH ? `<button onclick="transferToEditLich(this, '${rowDataString}')" style="border:1px solid #94a3b8; background:#fff; cursor:pointer; padding:3px 8px; border-radius:4px; color:#1e3a8a; font-weight:bold;" title="Sửa nội dung này">📝</button>` : "";
-       let htmlSua = `<td style="${styleSua}">${btnSua}</td>`;
 
-       tb.innerHTML += `
+       htmlStr += `
        <tr style="background-color:${i%2===0?'white':'#f9fafb'};">
-           ${htmlSua}
+           <td style="${styleSua}">${btnSua}</td>
            <td style="${centerStyle}">${i+1}</td>
            <td style="${centerStyle}">${r[0] || ""}</td>
            <td style="${centerStyle}">${r[1] || ""}</td>
@@ -191,6 +172,8 @@
            <td style="${centerStyle}">${linkHtml}</td>
        </tr>`;
     });
+    
+    tb.innerHTML = htmlStr;
   }
   
   function transferToEditLich(btn, dataEncoded) {
@@ -198,16 +181,10 @@
            const rowData = JSON.parse(decodeURIComponent(dataEncoded));
            if(typeof fillFormLich === 'function') {
                fillFormLich(rowData);
-               const tr = btn.closest('tr');
-               tr.style.backgroundColor = '#fef9c3'; 
-               tr.style.transition = 'opacity 0.5s'; 
-               tr.style.opacity = '0';
-               setTimeout(() => tr.remove(), 500);
-               if(typeof toast === 'function') toast("✅ Đã chuyển dữ liệu sang tab [NHẬP LỊCH CÔNG TÁC].");
-           } else {
-               if(typeof toast === 'function') toast("❌ Lỗi: Không tìm thấy hàm điền dữ liệu.");
-           }
-       } catch(e) { console.error(e); if(typeof toast === 'function') toast("❌ Lỗi đọc dữ liệu!"); }
+               const tr = btn.closest('tr'); tr.style.backgroundColor = '#fef9c3'; tr.style.transition = 'opacity 0.5s'; tr.style.opacity = '0'; setTimeout(() => tr.remove(), 500);
+               if(typeof toast === 'function') toast("✅ Đã chuyển dữ liệu sang tab [NHẬP LỊCH].");
+           } else { if(typeof toast === 'function') toast("❌ Lỗi: Không tìm thấy hàm điền dữ liệu."); }
+       } catch(e) { if(typeof toast === 'function') toast("❌ Lỗi đọc dữ liệu!"); }
   }
 
   function formatDate(elm) { 
