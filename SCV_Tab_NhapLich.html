@@ -50,6 +50,9 @@
 </div>
 
 <script>
+  // BỘ NHỚ ĐỆM TỐI ƯU HÓA API GEMINI CHO PHÂN HỆ LỊCH CÔNG TÁC
+  window.SCV_EXTRACT_CACHE_LICH = window.SCV_EXTRACT_CACHE_LICH || {};
+
   function addRowLich() {
     const tbody = document.getElementById('bodyLich');
     const newRow = tbody.rows[0].cloneNode(true);
@@ -63,9 +66,6 @@
     tbody.appendChild(newRow);
   }
 
-  /* ==========================================================
-     HÀM XÓA LỊCH ĐÃ ĐƯỢC NÂNG CẤP ĐỒNG BỘ
-     ========================================================== */
   function delRowLich(btn) { 
       const row = btn.closest('tr');
       const tbody = document.getElementById('bodyLich');
@@ -142,8 +142,38 @@
   }
 
   // ==========================================================
-  // KHỐI XỬ LÝ TRỢ LÝ AI: TÌM VĂN BẢN CHÍNH (LỊCH CÔNG TÁC)
+  // MODULE AI ĐỌC HIỂU LỊCH CÔNG TÁC - TỐI ƯU HÓA HIỆU ỨNG VÀ BỘ NHỚ
   // ==========================================================
+
+  function typeWriterFormFillLich(tr, aiData) {
+      const inputs = tr.querySelectorAll('textarea');
+      
+      const targets = [
+          { el: inputs[0], text: aiData.ngay || "" },
+          { el: inputs[1], text: aiData.gio || "" },
+          { el: inputs[2], text: aiData.noidung || "" },
+          { el: inputs[3], text: aiData.chutri || "" },
+          { el: inputs[4], text: aiData.diadiem || "" },
+          { el: inputs[5], text: aiData.thanhphan || "" }
+      ];
+
+      targets.forEach(t => t.el.value = "");
+
+      function typing() {
+          let stillTyping = false;
+          targets.forEach(t => {
+              if (t.el.value.length < t.text.length) {
+                  t.el.value += t.text.charAt(t.el.value.length);
+                  autoResize(t.el); 
+                  stillTyping = true;
+              }
+          });
+
+          if (stillTyping) { setTimeout(typing, 10); }
+      }
+      typing();
+  }
+
   function extractAILichInfo(btn) {
       const tr = btn.closest('tr');
       const container = btn.parentElement;
@@ -154,6 +184,13 @@
           return;
       }
       
+      const cacheKey = "EXTRACT_LICH_" + linkStr;
+      if (window.SCV_EXTRACT_CACHE_LICH[cacheKey]) {
+          typeWriterFormFillLich(tr, window.SCV_EXTRACT_CACHE_LICH[cacheKey]);
+          toast("⚡ Đã nạp dữ liệu tức thì từ bộ nhớ đệm!");
+          return;
+      }
+
       const originalHtml = btn.innerHTML;
       btn.innerHTML = "⏳ Đang xử lý...";
       btn.disabled = true;
@@ -180,28 +217,15 @@ YÊU CẦU BẮT BUỘC:
           if (res && res.success) {
               try {
                   let aiData = JSON.parse(res.message);
-
-                  if (Array.isArray(aiData) && aiData.length > 0) {
-                      aiData = aiData[0];
-                  }
-
-                  const inputs = tr.querySelectorAll('textarea');
+                  if (Array.isArray(aiData) && aiData.length > 0) { aiData = aiData[0]; }
                   
-                  if (aiData.ngay) inputs[0].value = aiData.ngay;
-                  if (aiData.gio) inputs[1].value = aiData.gio;
-                  if (aiData.noidung) inputs[2].value = aiData.noidung; 
-                  if (aiData.chutri) inputs[3].value = aiData.chutri;
-                  if (aiData.diadiem) inputs[4].value = aiData.diadiem;
-                  if (aiData.thanhphan) inputs[5].value = aiData.thanhphan;
+                  // Lưu kết quả vào Cache RAM
+                  window.SCV_EXTRACT_CACHE_LICH[cacheKey] = aiData;
+                  typeWriterFormFillLich(tr, aiData);
                   
-                  inputs.forEach(t => autoResize(t));
                   toast("✨ AI đã phân tích sự kiện chính thành công!");
-              } catch (e) {
-                  toast("⚠️ Lỗi trích xuất cấu trúc dữ liệu. Vui lòng thử lại!");
-              }
-          } else {
-              toast("❌ Lỗi AI: " + (res ? res.message : "Lỗi không xác định"));
-          }
+              } catch (e) { toast("⚠️ Lỗi trích xuất cấu trúc dữ liệu. Vui lòng thử lại!"); }
+          } else { toast("❌ Lỗi AI: " + (res ? res.message : "Lỗi không xác định")); }
       }).withFailureHandler(function(err) {
           btn.innerHTML = originalHtml;
           btn.disabled = false;
